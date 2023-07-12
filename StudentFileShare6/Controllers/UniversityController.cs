@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StudentFileShare6.data;
 using System.Text.RegularExpressions;
+using NPinyin;
+
 
 namespace StudentFileShare6.Controllers
 {
@@ -59,6 +61,30 @@ namespace StudentFileShare6.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("SchoolID","Name","Location")] University university)
         {
+            //if we want input only Chinese characters, uncomment below
+
+            //// Regular expressions for matching Chinese characters
+            //Regex chineseRegex = new Regex(@"[\u4e00-\u9fa5]");
+
+            //// Minimum required number of Chinese characters, name min 3 characters, location min 2 characters
+            //int minNameChars = 3;
+            //int minLocationChars = 2;
+
+            //// Check "Name" property
+            //if (!chineseRegex.IsMatch(university.Name) || chineseRegex.Matches(university.Name).Count < minNameChars)
+            //{
+            //    ModelState.AddModelError("Name", "The Name field must contain at least 3 Chinese characters.");
+            //    //it will show below the text field in red if the stuff we entered doesn't satisfy the requirements
+            //}
+
+            //// Check "Location" property
+            //if (!chineseRegex.IsMatch(university.Location) || chineseRegex.Matches(university.Location).Count < minLocationChars)
+            //{
+            //    ModelState.AddModelError("Location", "The Location field must contain at least 2 Chinese characters.");
+            //    //it will show below the text field in red if the stuff we entered doesn't satisfy the requirements
+            //}
+
+
             //For the ModelState.IsValid property to be true in this case, the University object passed to the Create method must contain the properties specified in the [Bind] attribute: "SchoolID", "Name", and "Location". If any of these properties are missing or their values fail validation, ModelState.IsValid will be false.
             if (!ModelState.IsValid)
             {
@@ -78,18 +104,39 @@ namespace StudentFileShare6.Controllers
             
             if (ModelState.IsValid)
             //The ModelState.IsValid property in ASP.NET MVC is used to determine if the model passed to the action method is valid based on the validation rules defined in the model class. When ModelState.IsValid is false, it means that there are validation errors present.  
-            //disabled for now because strange error, later use client side valiation instead (on cshtml file)
+            
               {
+                //if we want input only Chinese characters, uncomment below
 
-            university.GenerateRandomSchoolID(_context);   //generate a random university ID
+                //// Convert Chinese characters to Pinyin for Name
+                //String NameInCharacters = university.Name;    //in Chinese characters
+                //university.Name = Pinyin.GetPinyin(university.Name);
+
+                //// Convert Chinese characters to Pinyin for Location
+                //String LocationInCharacters = university.Location;   //in Chinese characters
+                //university.Location = Pinyin.GetPinyin(university.Location);
+
+
+                university.GenerateRandomSchoolID(_context);
+                //we store input in Chinese characters in NameInCharacters LocationInCharacters, then we convert them
+                //to Pinying and generate a random university ID (we only want English alphabet in SchoolID), then set back Name and Location in Chinese characters
+
+                //university.Name = NameInCharacters;
+                //university.Location = LocationInCharacters;
+
             _context.Add(university);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                //  return RedirectToAction(nameof(Index));
+                // return RedirectToAction("Index", "Home");   //redirect to "index" action of "home" controller
+                return RedirectToAction("UniversityCreateSuccess", "University");   //redirect to "CourseCreateSuccess" action of "Course" controller
 
-               }
+            }
+
+
+
             return View(university);
         }
-
+     
 
 
 
@@ -119,6 +166,27 @@ namespace StudentFileShare6.Controllers
             if (id != university.SchoolID)
             {
                 return NotFound();
+            }
+
+            // Regular expressions for matching Chinese characters
+            Regex chineseRegex = new Regex(@"[\u4e00-\u9fa5]");
+
+            // Minimum required number of Chinese characters, name min 3 characters, location min 2 characters
+            int minNameChars = 3;
+            int minLocationChars = 2;
+
+            // Check "Name" property
+            if (!chineseRegex.IsMatch(university.Name) || chineseRegex.Matches(university.Name).Count < minNameChars)
+            {
+                ModelState.AddModelError("Name", "The Name field must contain at least 3 Chinese characters.");
+                //it will show below the text field in red if the stuff we entered doesn't satisfy the requirements
+            }
+
+            // Check "Location" property
+            if (!chineseRegex.IsMatch(university.Location) || chineseRegex.Matches(university.Location).Count < minLocationChars)
+            {
+                ModelState.AddModelError("Location", "The Location field must contain at least 2 Chinese characters.");
+                //it will show below the text field in red if the stuff we entered doesn't satisfy the requirements
             }
 
             if (ModelState.IsValid)
@@ -184,6 +252,12 @@ namespace StudentFileShare6.Controllers
         private bool UniversityExists(string id)
         {
           return (_context.Universities?.Any(e => e.SchoolID == id)).GetValueOrDefault();
+        }
+
+        public async Task<IActionResult> UniversityCreateSuccess()
+        {
+            //after upload complete we show this
+            return View();
         }
     }
 }

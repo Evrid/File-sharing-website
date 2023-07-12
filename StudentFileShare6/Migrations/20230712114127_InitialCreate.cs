@@ -1,43 +1,17 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace StudentFileShare6.Migrations.University
+namespace StudentFileShare6.Migrations
 {
     /// <inheritdoc />
-    public partial class University1 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "IdentityUser",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IdentityUser", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Universities",
+                name: "universities",
                 columns: table => new
                 {
                     SchoolID = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
@@ -46,7 +20,7 @@ namespace StudentFileShare6.Migrations.University
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Universities", x => x.SchoolID);
+                    table.PrimaryKey("PK_universities", x => x.SchoolID);
                 });
 
             migrationBuilder.CreateTable(
@@ -54,16 +28,17 @@ namespace StudentFileShare6.Migrations.University
                 columns: table => new
                 {
                     CourseID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CourseName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SchoolID = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UniversitySchoolID = table.Column<string>(type: "nvarchar(128)", nullable: true)
+                    UniversitiesSchoolID = table.Column<string>(type: "nvarchar(128)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Course", x => x.CourseID);
                     table.ForeignKey(
-                        name: "FK_Course_Universities_UniversitySchoolID",
-                        column: x => x.UniversitySchoolID,
-                        principalTable: "Universities",
+                        name: "FK_Course_universities_UniversitiesSchoolID",
+                        column: x => x.UniversitiesSchoolID,
+                        principalTable: "universities",
                         principalColumn: "SchoolID");
                 });
 
@@ -77,11 +52,14 @@ namespace StudentFileShare6.Migrations.University
                     CourseID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Year = table.Column<int>(type: "int", nullable: false),
                     Category = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Rating = table.Column<float>(type: "real", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Rating = table.Column<float>(type: "real", nullable: true),
                     Anonymous = table.Column<bool>(type: "bit", nullable: false),
-                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Link = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserID = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Link = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LikeNumber = table.Column<int>(type: "int", nullable: true),
+                    DislikeNumber = table.Column<int>(type: "int", nullable: true),
+                    FirstPageImageLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UniversitySchoolID = table.Column<string>(type: "nvarchar(128)", nullable: true)
                 },
                 constraints: table =>
@@ -94,22 +72,16 @@ namespace StudentFileShare6.Migrations.University
                         principalColumn: "CourseID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Document_IdentityUser_UserID",
-                        column: x => x.UserID,
-                        principalTable: "IdentityUser",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Document_Universities_UniversitySchoolID",
+                        name: "FK_Document_universities_UniversitySchoolID",
                         column: x => x.UniversitySchoolID,
-                        principalTable: "Universities",
+                        principalTable: "universities",
                         principalColumn: "SchoolID");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Course_UniversitySchoolID",
+                name: "IX_Course_UniversitiesSchoolID",
                 table: "Course",
-                column: "UniversitySchoolID");
+                column: "UniversitiesSchoolID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Document_CourseID",
@@ -120,11 +92,6 @@ namespace StudentFileShare6.Migrations.University
                 name: "IX_Document_UniversitySchoolID",
                 table: "Document",
                 column: "UniversitySchoolID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Document_UserID",
-                table: "Document",
-                column: "UserID");
         }
 
         /// <inheritdoc />
@@ -137,10 +104,7 @@ namespace StudentFileShare6.Migrations.University
                 name: "Course");
 
             migrationBuilder.DropTable(
-                name: "IdentityUser");
-
-            migrationBuilder.DropTable(
-                name: "Universities");
+                name: "universities");
         }
     }
 }

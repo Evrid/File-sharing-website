@@ -5,22 +5,21 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using StudentFileShare6.data;
 
 #nullable disable
 
-namespace StudentFileShare6.Migrations
+namespace StudentFileShare6.Migrations.ApplicationDatabaseConnectionMigrations
 {
     [DbContext(typeof(ApplicationDatabaseConnection))]
-    [Migration("20230613123606_IdentityTables")]
-    partial class IdentityTables
+    [Migration("20230712115853_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "7.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);

@@ -1,0 +1,479 @@
+﻿@model Document
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index for search</h1>
+
+
+<div class="row">
+    <h1 class="display-4">Welcome</h1>
+    @* <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>*@
+    <div class="col-md-4">
+    <form id="searchDocumentForm" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label asp-for="SchoolID" class="control-label">Please enter and select a university name:</label>
+            <input type="text" id="schoolInput" class="form-control" autocomplete="off" list="universityList" required />
+            <datalist id="universityList"></datalist>
+            <input type="hidden" asp-for="SchoolID" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="CourseID" class="control-label">Please enter and select a course name:</label>
+            <input type="text" id="courseInput" class="form-control" autocomplete="off" list="courseList" required disabled />
+            @*  disabled unless select "schoolInput" first*@
+            <datalist id="courseList"></datalist>
+            <input type="hidden" asp-for="CourseID" />
+        </div>
+
+
+        <div>
+            <label for="textInput">File name:</label>
+            <input type="text" id="textInput" name="textInput">
+        </div>
+
+
+        <div class="form-group">
+            <input type="submit" value="Search" class="btn btn-primary" />
+        </div>
+    </form>
+
+    <div id="searchResultsSection" style="display: none;">
+        <h2>Search Results</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name and preview</th> 
+                    <th>Year</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Rating</th>
+                   @* <th>Anonymous</th>
+                    <th>User ID</th>
+                    <th>Link</th>
+                    <th>University</th>
+                    <th>Course</th>*@
+            </thead>
+            <tbody id="searchResultsBody">
+                <!-- Search results will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+    </div>
+    <div class="col-md-6 col-md-offset-2">
+        <p>Existing courses:</p>
+
+        <p>
+            <strong>Lund University:</strong><br>
+            Database<br>
+            Discrete Mathematics
+        </p>
+
+        <p>
+            <strong>Lulea University:</strong><br>
+            Accounting<br>
+            Aerospace Engineering
+        </p>
+
+        <p>In each course, we have two "<strong>Lecture notes</strong>" and two "<strong>Assignment</strong>".  </p>
+        <p>Make sure when you search, use the above information, such as "<strong>Lund University</strong>", "<strong>Database</strong>", "<strong>Assignment</strong>".</p>
+
+    </div>
+</div>
+
+
+
+    <div>
+        <p>My skills used in this page include:</p>
+        <p><strong>1. Form-based User Interface:</strong> The view presents a user interface that includes a form with input fields and a search button. Users can enter search criteria and submit the form to retrieve search results.</p>
+
+        <p><strong>2. Autocompletion:</strong> The input fields for university and course names utilize the <code>datalist</code> element to provide autocompletion suggestions based on user input. The suggestions are dynamically loaded from the server using AJAX requests.</p>
+
+        <p><strong>3. Dynamic Field Interactions:</strong> The view includes JavaScript code that enables/disable the course input field based on the selection of a university. This ensures that users can only select a course after selecting a university.</p>
+
+        <p><strong>4. Validation:</strong> The JavaScript code in the view validates the form submission by checking if a valid course option is selected before submitting the form. If the user has not selected a course after selecting a university, an alert message is displayed.</p>
+
+        <p><strong>5. Asynchronous Data Retrieval:</strong> The view uses the Fetch API to send asynchronous requests to the server and retrieve search results without reloading the page. This provides a smooth user experience and avoids interrupting the user's workflow.</p>
+
+        <p><strong>6. Dynamic Result Display:</strong> Upon receiving the search results from the server, the view dynamically updates the search results section by appending rows to the table. The results are displayed in a tabular format with columns for name, year, category, description, and rating.</p>
+
+        <p><strong>7. Image Display:</strong> The view retrieves and displays the first page image of each search result by fetching the image data from a provided URL. The images are resized and displayed alongside the respective search result.</p>
+
+        <p><strong>8. Conditional Result Handling:</strong> The view handles different scenarios based on the search results received. If search results are found, they are displayed in the table. If no results are found, a message is displayed indicating the absence of results.</p>
+
+        <p><strong>9. Client-Side Performance:</strong> By utilizing client-side rendering and AJAX requests, the view provides a responsive and efficient user experience. Users can retrieve search results without full page reloads, reducing server load and improving performance.</p>
+
+        <p><strong>10. Data Binding:</strong> The view is strongly typed with a model (<code>Document</code>), allowing for easy access to model properties in the view, such as <code>Model.Name</code> and <code>Model.CourseID</code>.</p>
+
+        <p>These features collectively enhance the user interface, improve usability, and provide a seamless search experience for users interacting with the application.</p>
+
+
+
+    </div>
+
+
+
+@section Scripts {
+
+  @*  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>*@
+
+  @*<script src="~/js/signalr/dist/browser/signalr.js"></script>*@
+
+
+
+
+    <script>
+        //For university
+        const inputElement = document.getElementById('schoolInput');
+        const datalistElement = document.getElementById('universityList');
+        const hiddenInput = document.querySelector('input[type="hidden"][name="SchoolID"]');
+        // When the user selects an option from the datalist, the corresponding value is set to the hidden input field (hiddenInput.value = selectedValue). This means that when the form is submitted, the value of the hidden input field will be included in the form data
+
+        var SelectedSchoolID;   //for select course only in the university
+
+
+        inputElement.addEventListener('input', function () {
+            const inputText = inputElement.value;
+            if (inputText.length === 0) {
+                datalistElement.innerHTML = ''; // Clear the datalist if the input is empty
+            } else {
+
+                //  console.log(inputText);   //works well
+                getUniversities(inputText);
+            }
+        });
+
+        function getUniversities(searchText) {
+            fetch(`/Document/GetUniversities?searchText=${searchText}`)
+                //the GetUniversities function in DocumentController.cs is not directly called in the Create.cshtml file.
+                // Instead, it is called asynchronously from JavaScript code using the fetch API.
+                .then(response => response.json())
+                .then(data => {
+                    datalistElement.innerHTML = ''; // Clear the datalist
+                    //       console.log(data); // Log the response data to the console, works well
+                    //        console.log(typeof(data));
+                    //if the typeof(data) is showing "object" instead of an array, it suggests that the data variable is an object rather than an array.
+                    for (const key in data) {
+                        // iterate over the enumerable properties of an object.
+                        if (data.hasOwnProperty(key)) {
+                            //The hasOwnProperty() method is used to ensure that the property belongs directly to the data object itself and not to its prototype chain.
+                            const university = data[key];
+                            console.log(university);  // works well
+                            const optionElement = document.createElement('option');
+                            optionElement.text = university.name + " (" + university.location + ")";
+                            optionElement.setAttribute('data-value', university.schoolID);
+                            //  console.log(university.name);   //works well
+                            datalistElement.appendChild(optionElement);
+                        }
+                    }
+
+                    // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
+                    schoolInput.addEventListener('change', function (event) {
+                        const selectedText = event.target.value;
+                        const selectedOption = Array.from(datalistElement.options).find(option => option.text === selectedText);
+
+                        if (selectedOption) {
+                            const selectedValue = selectedOption.getAttribute('data-value');
+                            hiddenInput.value = selectedValue;
+                            console.log('Selected UniversityID Value:', selectedValue);
+                            SelectedSchoolID = hiddenInput.value;    //for select course only in that university
+                            console.log(' SelectedSchoolID:', SelectedSchoolID);
+                            //  console.log(typeof (SelectedSchoolID));
+                            // Set the value of the hidden input field for school ID
+
+                        } else {
+                            hiddenInput.value = '';
+                            console.log('Selected UniversityID Value: None');
+
+                        }
+                    });
+                });
+        }
+    </script>
+
+    <script>
+        //undisable "course" selection when the user has selected something from "university"
+
+        document.getElementById('schoolInput').addEventListener('change', function () {
+            //The "change" event listener will be triggered when the user selects an option from a dropdown, but not when they simply enter text in the input field (we use "input" if we want to detect if the user entered something).
+            var secondInput = document.getElementById('courseInput');
+            secondInput.disabled = false;
+        });
+
+    </script>
+
+    <script>
+        //For courses
+
+        const inputElement2 = document.getElementById('courseInput');
+        const datalistElement2 = document.getElementById('courseList');
+        const hiddenInput2 = document.querySelector('input[type="hidden"][name="CourseID"]');
+        // When the user selects an option from the datalist, the corresponding value is set to the hidden input field. This means that when the form is submitted, the value of the hidden input field will be included in the form data
+
+
+        inputElement2.addEventListener('input', function () {
+            const inputText2 = inputElement2.value;
+            if (inputText2.length === 0) {
+                datalistElement2.innerHTML = ''; // Clear the datalist if the input is empty
+            } else {
+
+                //  console.log(inputText);   //works well
+                getCourses(inputText2);
+            }
+        });
+
+        function getCourses(searchText2) {
+            fetch(`/Document/GetCourses?searchText=${searchText2}&SelectedSchoolID=${SelectedSchoolID}`)
+
+                //the GetUniversities function in DocumentController.cs is not directly called in the Create.cshtml file.
+                // Instead, it is called asynchronously from JavaScript code using the fetch API.
+                .then(response => response.json())
+                .then(data => {
+                    datalistElement2.innerHTML = ''; // Clear the datalist
+                    //       console.log(data); // Log the response data to the console, works well
+                    //        console.log(typeof(data));
+                    //if the typeof(data) is showing "object" instead of an array, it suggests that the data variable is an object rather than an array.
+                    for (const key in data) {
+                        // iterate over the enumerable properties of an object.
+                        if (data.hasOwnProperty(key)) {
+                            //The hasOwnProperty() method is used to ensure that the property belongs directly to the data object itself and not to its prototype chain.
+                            const course = data[key];
+                            console.log(course);  // works well
+                            const optionElement = document.createElement('option');
+                            optionElement.text = course.name;
+                            optionElement.setAttribute('data-value', course.courseID);
+                            //   console.log(course.name);   //works well
+                            datalistElement2.appendChild(optionElement);
+                        }
+                    }
+
+                    // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
+                    courseInput.addEventListener('change', function (event) {
+                        const selectedText = event.target.value;
+                        const selectedOption = Array.from(datalistElement2.options).find(option => option.text === selectedText);
+
+                        if (selectedOption) {
+                            const selectedValue = selectedOption.getAttribute('data-value');
+                            hiddenInput2.value = selectedValue;
+                            console.log('Selected CourseID Value:', selectedValue);
+                        } else {
+                            hiddenInput2.value = '';
+                            console.log('Selected CourseID Value: None');
+                        }
+                    });
+                });
+        }
+    </script>
+
+
+    <script>
+        //ask user must select from datalist of courseList
+        document.querySelector('form').addEventListener('submit', function (event) {
+            var input = document.getElementById('courseInput');
+            var options = document.getElementById('courseList').options;
+            var value = input.value;
+
+            var match = Array.from(options).find(function (option) {
+                return option.value === value;
+            });
+
+            if (!match) {
+                event.preventDefault(); // Prevent form submission
+                alert('After select a valid university from the list, select a valid course option from the list.');
+            }
+        });
+
+    </script>
+
+
+
+
+
+    <script>
+        // Handle form search submission
+        document.getElementById("searchDocumentForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent the form from submitting and page reloading
+
+            // Get the search input values
+            //var schoolInput = document.getElementById("schoolInput").value;
+            //var courseInput = document.getElementById("courseInput").value;
+            var textInput = document.getElementById("textInput").value;
+
+
+  
+            // Perform AJAX request to get search results
+            var xhr = new XMLHttpRequest();
+            //because we used hiddenInput.value for SchoolID and hiddenInput2.value for CourseID, so we can use them directly
+            xhr.open("GET", "/Search/Search?SchoolID=" + hiddenInput.value +
+                "&CourseID=" + hiddenInput2.value +
+                "&textInput=" + encodeURIComponent(textInput), true);
+            console.log(' works until here');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var searchResults = JSON.parse(xhr.responseText);
+                    console.log(' searchResults:', searchResults);
+                    // Update the search results section with the received data
+                    var searchResultsBody = document.getElementById("searchResultsBody");
+                    searchResultsBody.innerHTML = ""; // Clear previous results
+
+                    if (searchResults.length > 0) {
+                        // Display search results
+                        searchResults.forEach(function (result) {
+                            var row = document.createElement("tr");
+
+                            //-----------------------  if we want display all elements use below code:
+
+                            //for (var prop in result) {
+                            //    if (result.hasOwnProperty(prop)) {
+                            //        var cell = document.createElement("td");
+                            //        cell.textContent = result[prop];
+                            //        row.appendChild(cell);
+                            //    }
+                            //}
+
+                            //-----------------------
+                            //if we only want display certain element, use below code instead
+
+
+                           
+                            console.log(' Result:', result);
+
+
+
+                            var nameCell = document.createElement("td");
+                            var link = document.createElement("a");
+                            link.href = "/Document/docview/" + result.universityName + "/" + result.courseName + "/" + result.name + "/" + result.documentID;
+                            link.textContent = result.name;
+                            nameCell.appendChild(link);
+                            nameCell.classList.add("hyperlink"); // Add a CSS class for styling if desired
+                            row.appendChild(nameCell);
+
+
+
+
+                       //     var nameCell = document.createElement("td");
+                            var image = document.createElement("img");
+                            var originalLink = result.firstPageImageLink;
+                            var imageURL = originalLink.replace(/^http:/, 'https:');   //we must use it because we need all https link, otherwise won't work
+                           
+                        //   var imageURL = "https://pdffirstpageimage.oss-eu-central-1.aliyuncs.com/693438484?Expires=4844246788&OSSAccessKeyId=LTAI5tHfC1uRSqRZswqEo5EQ&Signature=f2YXlcI11LUgJanyED980Eq8D3w%3D"; // Replace with the URL of the byte array
+                              // Fetch the byte array from the URL
+                            fetch(imageURL)
+                                .then(response => response.arrayBuffer())
+                                .then(buffer => {
+                                    // Convert byte array to base64-encoded image data
+                                    var byteArray = new Uint8Array(buffer);
+                                    var binaryData = [];
+                                    for (var i = 0; i < byteArray.byteLength; i++) {
+                                        binaryData.push(byteArray[i]);
+                                    }
+                                    var base64Data = btoa(String.fromCharCode.apply(null, binaryData));
+
+                                    image.src = "data:image/png;base64," + base64Data;
+
+                                    // Adjust the size of the displayed image
+                                    image.style.width = "200px"; // Set the desired width
+                                    image.style.height = "auto"; // Set height to "auto" for aspect ratio to be preserved
+
+                                    nameCell.appendChild(image);
+                                   
+                                })
+                                .catch(error => {
+                                    console.error("Failed to fetch or convert the byte array:", error);
+                                });
+
+
+
+
+
+
+
+
+
+                            var yearCell = document.createElement("td");
+                            yearCell.textContent = result.year;
+                            row.appendChild(yearCell);
+
+                            //var categoryCell = document.createElement("td");
+                            //categoryCell.textContent = result.category;
+                            //row.appendChild(categoryCell);
+
+                            var categoryCell = document.createElement("td");
+var categoryValue = result.category;
+
+switch (categoryValue) {
+  case 0:
+    categoryCell.textContent = "Lecture notes";
+    break;
+  case 1:
+    categoryCell.textContent = "Practice materials";
+    break;
+  case 2:
+    categoryCell.textContent = "Coursework";
+    break;
+  case 3:
+    categoryCell.textContent = "Summaries";
+    break;
+  case 4:
+    categoryCell.textContent = "Assignments";
+    break;
+  case 5:
+    categoryCell.textContent = "Tutorial work";
+    break;
+  case 6:
+    categoryCell.textContent = "Essays";
+    break;
+  case 7:
+    categoryCell.textContent = "Other";
+    break;
+  default:
+    categoryCell.textContent = "Unknown category";
+    break;
+}
+
+row.appendChild(categoryCell);
+
+
+                            var descriptionCell = document.createElement("td");
+                            descriptionCell.textContent = result.description;
+                            row.appendChild(descriptionCell);
+
+                            var ratingCell = document.createElement("td");
+                            if (result.rating==null){ratingCell.textContent = "none"} else{
+                           ratingCell.textContent = result.rating;}
+                            row.appendChild(ratingCell);
+
+                            //-----------------------
+
+                            searchResultsBody.appendChild(row);
+                        });
+
+                        // Show the search results section
+                        document.getElementById("searchResultsSection").style.display = "block";
+                    } else {
+                        // No results found
+                        searchResultsBody.innerHTML = "<tr><td colspan='2'>No results found.</td></tr>";
+                        document.getElementById("searchResultsSection").style.display = "block";
+                    }
+                }
+            };
+            xhr.send();
+        });
+    </script>
+
+
+
+
+
+
+
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        //used to generate HTML dynamically on the server-side, the code is rendering the "_ValidationScriptsPartial" partial view and waiting for its completion using the await keyword
+    }
+
+
+}

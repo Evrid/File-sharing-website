@@ -1,6 +1,8 @@
 ﻿
 
 using Microsoft.EntityFrameworkCore;
+using StudentFileShare6.Models;
+
 
 namespace StudentFileShare6.data
 {
@@ -10,7 +12,8 @@ namespace StudentFileShare6.data
         {
         }
 
-        public DbSet<Document> Documents { get; set; }
+        public DbSet<Document> Document { get; set; }
+        public DbSet<FileUploadProgress> FileUploadProgresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,7 +35,8 @@ namespace StudentFileShare6.data
 
             modelBuilder.Entity<Document>()
                 .Property(d => d.Rating)
-                .HasColumnType("decimal(18, 2)");
+                .HasColumnType("float");
+            // .HasColumnType("decimal(18, 2)");
 
             modelBuilder.Entity<Document>()
                 .HasOne(d => d.University)
@@ -44,71 +48,13 @@ namespace StudentFileShare6.data
                 .WithMany(c => c.Documents)
                 .HasForeignKey(d => d.CourseID);
 
-            modelBuilder.Entity<Document>()
-                .HasOne(d => d.User)
-                .WithMany()
-                .HasForeignKey(d => d.UserID)
-                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FileUploadProgress>().HasNoKey();
+
+
         }
     }
 }
 
 
 
-//using Microsoft.EntityFrameworkCore;
-
-
-//namespace StudentFileShare6.data
-//{
-//    public class DocumentContext : DbContext
-//    {
-
-//        public DocumentContext(DbContextOptions options) : base(options)
-//        //will establish a connection to the class
-//        {
-
-//        }
-
-//        public DbSet<Document> Documents { get; set; }
-
-//        protected override void OnModelCreating(ModelBuilder modelBuilder)
-//        {
-//            modelBuilder.Entity<Document>()
-//                .HasKey(d => d.DocumentID);
-
-//            modelBuilder.Entity<Document>()
-//                .Property(d => d.DocumentID)
-//                .IsRequired()
-//                .HasMaxLength(128);
-
-//            modelBuilder.Entity<Document>()
-//                .Property(d => d.Name)
-//                .HasMaxLength(128);
-
-//            modelBuilder.Entity<Document>()
-//                .Property(d => d.Description)
-//                .HasMaxLength(128);
-
-//            modelBuilder.Entity<Document>()
-//                .Property(d => d.Rating)
-//                .HasColumnType("decimal(18, 2)");
-
-//            modelBuilder.Entity<Document>()
-//                .HasOne(d => d.University)
-//                .WithMany(u => u.Documents)
-//                .HasForeignKey(d => d.SchoolID);
-
-//            modelBuilder.Entity<Document>()
-//                .HasOne(d => d.Course)
-//                .WithMany(c => c.Documents)
-//                .HasForeignKey(d => d.CourseID);
-
-//            modelBuilder.Entity<Document>()
-//                .HasOne(d => d.User)
-//                .WithMany()
-//                .HasForeignKey(d => d.UserID)
-//                .OnDelete(DeleteBehavior.Restrict);
-//        }
-//    }
-
-//}

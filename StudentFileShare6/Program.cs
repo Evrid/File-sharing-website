@@ -1,13 +1,18 @@
 using StudentFileShare6.data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-
+using Microsoft.AspNetCore.SignalR;
+using StudentFileShare6.Hubs;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddRazorPages()
+    .AddRazorRuntimeCompilation();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 builder.Services.AddDbContext<ApplicationDatabaseConnection>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("StudentFileShare")));
@@ -49,4 +54,15 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run();
+app.MapControllerRoute(
+    name: "Document",
+    pattern: "Document/docview/{schoolName}/{courseName}/{documentName}/{documentID}",
+    //for each document each page
+    defaults: new { controller = "Document", action = "DocView" }
+);
+
+
+app.MapHub<ProgressHub>("/ProgressHub");
+
+await app.RunAsync();
+

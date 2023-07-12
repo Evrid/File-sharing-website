@@ -1,0 +1,240 @@
+﻿@model StudentFileShare6.Models.Course
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Course</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+            <div class="form-group" style="display: none;">
+                <label asp-for="CourseID" class="control-label"></label>
+                <input asp-for="CourseID" class="form-control" value="DefaultCourseID" />
+                <span asp-validation-for="CourseID" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="CourseName" class="control-label"></label>
+                <input asp-for="CourseName" id="courseNameInput" class="form-control" />
+                <span asp-validation-for="CourseName" class="text-danger"></span>
+            </div>
+
+
+       @*   <div class="form-group">
+    <label asp-for="SchoolID" class="control-label">School name</label>
+    <select asp-for="SchoolID" class="form-control" asp-items="ViewBag.SchoolID"></select>
+</div>*@
+
+          <div class="form-group">
+                <label asp-for="SchoolID" class="control-label">Please enter and select a school name:</label>
+                <input type="text" id="schoolInput" class="form-control" autocomplete="off" list="universityList" />
+                <datalist id="universityList"></datalist>
+                <input type="hidden" asp-for="SchoolID" />
+            </div>
+                  <a href="@Url.Content("/university/Create")">Create a new university</a>
+
+            <div class="form-group">
+                <input type="submit" value="Create" id="submitButton" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+       <div class="col-md-6 col-md-offset-2">
+           <p>
+               Exisitng courses:
+        </p>
+        <p>
+            <strong>Lund University:</strong>
+            <br />
+            <span>Database</span>
+            <br />
+            <span>Discrete Mathematics</span>
+            <br />
+        </p>
+        <p>
+            <strong>Lulea University:</strong>
+            <br />
+            <span>Accounting</span>
+            <br />
+            <span>Aerospace Engineering</span>
+            <br />
+        </p>
+
+
+
+    </div>
+</div>
+
+@*<div>
+    <a asp-action="Index">Back to List</a>
+</div>*@
+
+<a href="@Url.Content("/Document/Create")">Back to upload documents</a>
+
+<div>
+    <p>My skills used in this page include:</p>
+
+    <p>
+        <strong>1. Model Binding:</strong> The view is strongly typed with the model directive. This allows accessing the properties of the model in the view.
+    </p>
+
+    <p>
+        <strong>2. Form Submission:</strong> The form in the view is configured to submit data to the server using the <code>asp-action</code> attribute in the <code>&lt;form&gt;</code> tag. This attribute specifies the action method in the controller that will handle the form submission.
+    </p>
+
+    <p>
+        <strong>3. Input Validation:</strong> The view includes validation for the input fields using the <code>asp-validation-for</code> and <code>asp-validation-summary</code> attributes. These attributes display validation error messages if the user enters invalid data.
+    </p>
+
+    <p>
+        <strong>4. Dynamic University Input:</strong> JavaScript code is used to create a dynamic university input field. It listens to changes in the input field and sends an asynchronous request to the server to fetch matching university names based on the user's input. The fetched data is then displayed in a datalist for the user to select from.
+    </p>
+
+    <p>
+        <strong>5. Conditional Form Submission:</strong> JavaScript code is used to handle the form submission event. It checks if the selected university name is valid and if the entered course name already exists for the selected university. If the conditions are met, the form is submitted; otherwise, an alert is displayed.
+    </p>
+
+    <p>Controller (CourseController):</p>
+
+    <p>
+        <strong>1. Model Binding:</strong> The action methods in the controller use model binding to receive the data from the view. The <code>[Bind]</code> attribute is used to specify the properties to bind, and the model state is checked for validation errors using <code>ModelState.IsValid</code>.
+    </p>
+
+    <p>
+        <strong>2. Entity Framework Core:</strong> The controller interacts with a database using Entity Framework Core. It retrieves, creates, updates, and deletes <code>Course</code> objects in the <code>CourseContext</code> database context.
+    </p>
+
+    <p>
+        <strong>3. View Data:</strong> The controller sets the <code>ViewData["SchoolID"]</code> property to populate the dropdown list for selecting a school name in the view.
+    </p>
+
+    <p>
+        <strong>4. Redirection:</strong> After successful form submission, the controller redirects the user to different views using the <code>RedirectToAction</code> method.
+    </p>
+
+    <p>
+        <strong>5. Asynchronous Operations:</strong> The controller uses the <code>async</code> and <code>await</code> keywords for asynchronous database operations to avoid blocking the execution thread.
+    </p>
+
+    <p>
+        <strong>6. Validation Handling:</strong> In the <code>Create</code> action, if the model state is not valid, the validation errors are logged and returned to the view for display.
+    </p>
+
+    <p>
+        These techniques demonstrate my ability to work with ASP.NET Core MVC, model binding, form submission, input validation, dynamic UI updates, database operations using Entity Framework Core, and asynchronous programming.
+    </p>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+
+    <script>
+        //for dynamic university input
+        const inputElement = document.getElementById('schoolInput');
+        const datalistElement = document.getElementById('universityList');
+        const hiddenInput = document.querySelector('input[type="hidden"][name="SchoolID"]');
+
+
+
+        inputElement.addEventListener('input', function () {
+            const inputText = inputElement.value;
+            if (inputText.length === 0) {
+                datalistElement.innerHTML = ''; // Clear the datalist if the input is empty
+            } else {
+
+                //  console.log(inputText);   //works well
+                getUniversities(inputText);
+            }
+        });
+
+        function getUniversities(searchText) {
+            fetch(`/Document/GetUniversities?searchText=${searchText}`)
+                //the GetUniversities function in DocumentController.cs is not directly called in the Create.cshtml file.
+                // Instead, it is called asynchronously from JavaScript code using the fetch API.
+                .then(response => response.json())
+                .then(data => {
+                    datalistElement.innerHTML = ''; // Clear the datalist
+                    //       console.log(data); // Log the response data to the console, works well
+                    //        console.log(typeof(data));
+                    //if the typeof(data) is showing "object" instead of an array, it suggests that the data variable is an object rather than an array.
+                    for (const key in data) {
+                        // iterate over the enumerable properties of an object.
+                        if (data.hasOwnProperty(key)) {
+                            //The hasOwnProperty() method is used to ensure that the property belongs directly to the data object itself and not to its prototype chain.
+                            const university = data[key];
+                            //   console.log(university);  // works well
+                            const optionElement = document.createElement('option');
+                            optionElement.text = university.name;
+                            optionElement.setAttribute('data-value', university.schoolID);
+                            console.log(university.name);   //works well
+                            datalistElement.appendChild(optionElement);
+                        }
+                    }
+
+                    // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
+                    schoolInput.addEventListener('change', function (event) {
+                        const selectedText = event.target.value;
+                        const selectedOption = Array.from(datalistElement.options).find(option => option.text === selectedText);
+
+                        if (selectedOption) {
+                            const selectedValue = selectedOption.getAttribute('data-value');
+                            hiddenInput.value = selectedValue;
+                            console.log('Selected Value:', selectedValue);
+                        } else {
+                            hiddenInput.value = '';
+                            console.log('Selected Value: None');
+                        }
+                    });
+                });
+        }
+    </script>
+
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function (event) {
+            var input = document.getElementById('schoolInput');
+            var options = document.getElementById('universityList').options;
+            var value = input.value;
+
+            var match = Array.from(options).find(function (option) {
+                return option.value === value;
+            });
+
+            if (!match) {
+                event.preventDefault(); // Prevent form submission
+                console.log("To here is correct");
+                alert('Select a university name from the list.');
+            } else {
+                var courseNameInput = document.getElementById('courseNameInput').value;
+
+                event.preventDefault(); // Prevents the form from submitting immediately
+
+                fetch(`/Document/ifCourseExist?givenCourse=${courseNameInput}&SelectedSchoolID=${hiddenInput.value}`)
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        if (data.length > 0) {
+                            alert('The course already exists with the given university.');
+                        } else {
+                            // Submit the form if the name doesn't exist
+                            document.getElementById('courseNameInput').form.submit();
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
+        });
+    </script>
+
+
+}

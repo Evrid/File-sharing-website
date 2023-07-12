@@ -1,8 +1,62 @@
-﻿@{
+﻿@model Document
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+  
+
+</div>
+
+<style>
+    .text-center button {
+        margin-bottom: 40px; /* Adds 10 pixels of margin below each button */
+    }
+</style>
+
+
+<div class="text-center">
+    <a href="@Url.Content("/university/Create")">
+        <button type="button">Create a new university</button>
+    </a>
+</div>
+
+<div class="text-center">
+    <a href="@Url.Content("/course/create")">
+        <button type="button">Create a new course</button>
+    </a>
+</div>
+
+<div class="text-center">
+    <a href="@Url.Content("/Document/Create")">
+        <button type="button">Upload documents</button>
+    </a>
+</div>
+
+<div class="text-center">
+    <a href="@Url.Content("/search/index")">
+        <button type="button">Search documents</button>
+    </a>
+</div>
+
+
+<div class="text-left">
+    <p>The project involves building a dynamic web application using <strong>ASP.NET Core MVC</strong>, <strong>Razor Syntax</strong>, <strong>Entity Framework Core</strong>, <strong>SignalR</strong>, and <strong>JavaScript</strong>. Users can create and manage university information, courses, and documents.</p>
+
+    <p>When creating a university, the application checks if the university with the given name and location already exists in the database before submitting the form. After successful creation, the user is redirected to a success page, providing a seamless experience.</p>
+
+    <p>In course creation, the application uses a form strongly typed with the <code>StudentFileShare6.Models.Course</code> model and includes form submission, input validation, dynamic university input field, and conditional form submission.</p>
+
+    <p>In document creation, the application follows the <strong>MVC architecture</strong>, uses <strong>Razor syntax</strong> for dynamic content generation, performs asynchronous operations, uses <strong>dependency injection</strong> for loose coupling, interacts with the database using <strong>Entity Framework Core</strong>, and uses <strong>SignalR</strong> for real-time updates.</p>
+
+    <p>For each document, the application provides functionalities like viewing, uploading, editing, deleting, and searching. During file upload, a dynamic progress bar is displayed using <strong>SignalR</strong> for real-time updates.</p>
+
+    <p>The search document feature provides an interface with form-based user interaction, autocompletion for university and course names, dynamic field interactions, validation, asynchronous data retrieval, and dynamic result display.</p>
+
+    <p>Finally, the <strong>DocView</strong> feature allows users to view a document in detail. It uses <strong>model binding</strong>, <strong>Razor syntax</strong>, <strong>View Data</strong>, and <strong>View Bag</strong> for data pass-through, <strong>JavaScript</strong> for interactivity, <strong>CSS</strong> for styling, external libraries like <strong>PDF.js</strong> for PDF rendering, <strong>AJAX</strong> requests for seamless updates, and <strong>cookies</strong> for preserving user actions.</p>
+
+    <p>These features and techniques showcase a comprehensive understanding of building interactive and responsive web applications using modern web technologies.</p>
+
 </div>

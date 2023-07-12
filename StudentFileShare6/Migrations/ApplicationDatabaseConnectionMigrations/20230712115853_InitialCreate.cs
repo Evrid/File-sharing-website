@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace StudentFileShare6.Migrations
+namespace StudentFileShare6.Migrations.ApplicationDatabaseConnectionMigrations
 {
     /// <inheritdoc />
-    public partial class IdentityTables : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -4,50 +4,65 @@ using StudentFileShare6.data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public class Document
+namespace StudentFileShare6.Models
 {
-    public string DocumentID { get; set; }
-    public string Name { get; set; }
-    public string SchoolID { get; set; }
-    public string CourseID { get; set; }
-    public int Year { get; set; }
-    public int Category { get; set; }
-    public string Description { get; set; }
-    public float Rating { get; set; }
-    public bool Anonymous { get; set; }
-    public string UserID { get; set; }
-    public string Link { get; set; }   //link to download the document
-    public University University { get; set; }
-    public Course Course { get; set; }
-    public IdentityUser User { get; set; }
-}
-
-public class DocumentService
-{
-    private readonly DocumentContext _context;
-
-    public DocumentService(DocumentContext context)
+    public class Document
     {
-        _context = context;
-    }
+        public string DocumentID { get; set; }
+        public string Name { get; set; }
+        public string SchoolID { get; set; }
+        public string CourseID { get; set; }
+        public int Year { get; set; }
+        public int Category { get; set; }
+        public string? Description { get; set; }
+        public float? Rating { get; set; }
+        //we need to change SQL's Rating manually from Real to Float using ALTER TABLE Document ALTER COLUMN Rating FLOAT;
+        //otherwise we will get error
+        //   SELECT DATA_TYPE
+        //FROM INFORMATION_SCHEMA.COLUMNS
+        //WHERE TABLE_NAME = 'Document'
+        //  AND COLUMN_NAME = 'Rating';
 
-    public void GenerateRandomDocumentID(Document document)
-    {
-        var random = new Random();
-        string generatedDocumentID;
+        public bool Anonymous { get; set; }
+        public string UserID { get; set; }
+        public string? Link { get; set; }   //link to download the document
+                                            //   public string? UniversitiesSchoolID { get; set; }
+        public int? LikeNumber { get; set; }
 
-        do
+        public int? DislikeNumber { get; set; }
+        public string? FirstPageImageLink { get; set; }
+
+        public University? University { get; set; }
+        public Course? Course { get; set; }
+        [NotMapped]
+        public List<FileUploadProgress>? FileUploadProgresses { get; set; }   //to show upload percentage
+
+
+        public void GenerateRandomDocumentID(DocumentContext context)
         {
-            generatedDocumentID = $"{random.Next(1000, 9999)}{document.SchoolID.Substring(0, 2)}{document.CourseID.Substring(0, 2)}";
-        } while (!IsDocumentIDUnique(generatedDocumentID));
+            var random = new Random();
+            string generatedDocumentID;
 
-        document.DocumentID = generatedDocumentID;
-    }
+            do
+            {
+                generatedDocumentID = $"{random.Next(10000, 99999)}{SchoolID.Substring(0, 2)}{CourseID.Substring(0, 2)}";
+            } while (!IsDocumentIDUnique(context, generatedDocumentID));
 
-    private bool IsDocumentIDUnique(string documentID)
-    {
-        return !_context.Documents.Any(d => d.DocumentID == documentID);
+            DocumentID = generatedDocumentID;
+        }
+
+
+
+
+
+        private bool IsDocumentIDUnique(DocumentContext context, string documentID)
+        {
+            return !context.Document.Any(d => d.DocumentID == documentID);
+             
+        }
     }
 }
 
@@ -55,52 +70,4 @@ public class DocumentService
 
 
 
-//using Microsoft.AspNetCore.Identity;
-//using StudentFileShare6.Models;
-//using StudentFileShare6.data;
-//public class Document
-//{
-//    public string DocumentID { get; set; }
-//    public string Name { get; set; }
-//    public string SchoolID { get; set; }
-//    public string CourseID { get; set; }
-//    public int Year { get; set; }
-//    public int Category { get; set; }
-//    public string Description { get; set; }
-//    public float Rating { get; set; }
-//    public bool Anonymous { get; set; }
-//    public string UserID { get; set; }
-//    public string Link { get; set; }   // //link to download the document
-//    public University University { get; set; }
-//    public Course Course { get; set; }
-//    public IdentityUser User { get; set; }
 
-
-//    public void GenerateRandomDocumentID()
-//    {
-//        // Generate a random unique DocumentID based on the provided information
-//        // You can implement your own logic here to ensure uniqueness
-//        // Example: concatenate a random number with other fields
-
-//        var random = new Random();
-//        string generatedDocumentID;
-
-//        do
-//        {
-//            generatedDocumentID = $"{random.Next(1000, 9999)}{SchoolID.Substring(0, 2)}{CourseID.Substring(0, 2)}";
-//        } while (!IsDocumentIDUnique(generatedDocumentID));
-
-//        DocumentID = generatedDocumentID;
-//    }
-
-//    private bool IsDocumentIDUnique(string documentID)
-//    {
-//        // Implement your logic to check if the generated DocumentID is unique
-//        // Example: query the database to see if any other Document has the same DocumentID
-
-//        using (var context = new DocumentContext())
-//        {
-//            return !context.Documents.Any(d => d.DocumentID == documentID);
-//        }
-//    }
-//}

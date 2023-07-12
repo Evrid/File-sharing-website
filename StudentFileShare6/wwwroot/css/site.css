@@ -20,3 +20,8 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.progress-bar {
+    width: 0%;
+    transition: width 0.3s ease-in-out;
+}

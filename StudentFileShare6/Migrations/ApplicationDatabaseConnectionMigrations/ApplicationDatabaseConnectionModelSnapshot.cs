@@ -4,11 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using StudentFileShare6.data;
 
 #nullable disable
 
-namespace StudentFileShare6.Migrations
+namespace StudentFileShare6.Migrations.ApplicationDatabaseConnectionMigrations
 {
     [DbContext(typeof(ApplicationDatabaseConnection))]
     partial class ApplicationDatabaseConnectionModelSnapshot : ModelSnapshot
@@ -17,7 +16,7 @@ namespace StudentFileShare6.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "7.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);

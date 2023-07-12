@@ -1,51 +1,5 @@
 ﻿
 
-//using StudentFileShare6.data;
-
-//namespace StudentFileShare6.Models
-//{
-//    public class Course
-//    {
-//        public string CourseID { get; set; }
-//        public string SchoolID { get; set; }
-//        public University University { get; set; }
-
-//        public List<Document> Documents { get; set; }
-
-//        public void GenerateRandomCourseID()
-//        {
-//            // Generate a random unique CourseID based on the SchoolID
-//            // You can implement your own logic here to ensure uniqueness
-//            // Example: concatenate a random number with the SchoolID
-
-//            var random = new Random();
-//            string generatedCourseID;
-
-//            do
-//            {
-//                generatedCourseID = $"{random.Next(1000, 9999)}{SchoolID}";
-//            } while (!IsCourseIDUnique(generatedCourseID));
-
-//            CourseID = generatedCourseID;
-//        }
-
-//        private bool IsCourseIDUnique(string courseID)
-//        {
-//            // Implement your logic to check if the generated CourseID is unique
-//            // Example: query the database to see if any other Course has the same CourseID
-
-//            // Assuming you have access to the UniversityContext instance, you can use the following code
-//            using (var context = new CourseContext())
-//            {
-//                return !context.Courses.Any(c => c.CourseID == courseID);
-//            }
-//        }
-//    }
-
-
-//}
-
-
 
 
 
@@ -59,12 +13,14 @@ namespace StudentFileShare6.Models
     public class Course
     {
         public string CourseID { get; set; }
+        public string CourseName { get; set; }
         public string SchoolID { get; set; }
-        public University University { get; set; }
+       public University? Universities { get; set; }   //table called "universities" in SQL as an object of class "university"
 
-        public List<Document> Documents { get; set; }
+        public List<Document>? Documents { get; set; }   //nullable
 
-        public void GenerateRandomCourseID(DbContextOptions<CourseContext> options)
+        // public void GenerateRandomCourseID(DbContextOptions<CourseContext> options)
+        public void GenerateRandomCourseID(CourseContext context)
         {
             var random = new Random();
             string generatedCourseID;
@@ -72,17 +28,17 @@ namespace StudentFileShare6.Models
             do
             {
                 generatedCourseID = $"{random.Next(1000, 9999)}{SchoolID}";
-            } while (!IsCourseIDUnique(generatedCourseID, options));
+                //generate a random 4 digit number and add SchoolID for courseID
+            } while (!IsCourseIDUnique(context, generatedCourseID));
 
             CourseID = generatedCourseID;
         }
 
-        private bool IsCourseIDUnique(string courseID, DbContextOptions<CourseContext> options)
+        private bool IsCourseIDUnique(CourseContext context, string courseID)
         {
-            using (var context = new CourseContext(options))
-            {
-                return !context.Courses.Any(c => c.CourseID == courseID);
-            }
+            
+                return !context.Course.Any(c => c.CourseID == courseID);
+           
         }
     }
 }
