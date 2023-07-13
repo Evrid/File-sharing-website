@@ -1,5 +1,5 @@
 
-# Project: File Sharing Website (files based on course and university)
+# Project: File Sharing Website (files based on different courses and universities)
 
 see
 
