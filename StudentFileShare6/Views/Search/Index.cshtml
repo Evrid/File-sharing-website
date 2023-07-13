@@ -77,7 +77,7 @@
             Aerospace Engineering
         </p>
 
-        <p>In each course, we have two "<strong>Lecture notes</strong>" and two "<strong>Assignment</strong>".  </p>
+        <p>In each course, we have two "<strong>Lecture note</strong>" and two "<strong>Assignment</strong>".  </p>
         <p>Make sure when you search, use the above information, such as "<strong>Lund University</strong>", "<strong>Database</strong>", "<strong>Assignment</strong>".</p>
 
     </div>
@@ -117,10 +117,7 @@
 
 @section Scripts {
 
-  @*  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>*@
-
-  @*<script src="~/js/signalr/dist/browser/signalr.js"></script>*@
-
+ 
 
 
 
@@ -168,9 +165,11 @@
                             datalistElement.appendChild(optionElement);
                         }
                     }
-
+                    console.log("Before change event triggered")
                     // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
-                    schoolInput.addEventListener('change', function (event) {
+                    schoolInput.addEventListener('input', function (event) {
+                        //we must use "input", "change" work in visual studio but doesn't work in Azure
+                        console.log("After change event triggered")
                         const selectedText = event.target.value;
                         const selectedOption = Array.from(datalistElement.options).find(option => option.text === selectedText);
 
@@ -219,7 +218,7 @@
                 datalistElement2.innerHTML = ''; // Clear the datalist if the input is empty
             } else {
 
-                //  console.log(inputText);   //works well
+                  console.log(inputText2);   //works well
                 getCourses(inputText2);
             }
         });
@@ -231,11 +230,14 @@
                 // Instead, it is called asynchronously from JavaScript code using the fetch API.
                 .then(response => response.json())
                 .then(data => {
+                    console.log("got json reponse");
+                    console.log(data);
                     datalistElement2.innerHTML = ''; // Clear the datalist
                     //       console.log(data); // Log the response data to the console, works well
                     //        console.log(typeof(data));
                     //if the typeof(data) is showing "object" instead of an array, it suggests that the data variable is an object rather than an array.
                     for (const key in data) {
+                        console.log(key);
                         // iterate over the enumerable properties of an object.
                         if (data.hasOwnProperty(key)) {
                             //The hasOwnProperty() method is used to ensure that the property belongs directly to the data object itself and not to its prototype chain.
@@ -250,7 +252,7 @@
                     }
 
                     // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
-                    courseInput.addEventListener('change', function (event) {
+                    courseInput.addEventListener('input', function (event) {
                         const selectedText = event.target.value;
                         const selectedOption = Array.from(datalistElement2.options).find(option => option.text === selectedText);
 
@@ -292,28 +294,210 @@
 
 
     <script>
+        //AJAX doesn't work in Azure, we must use javascript
+
         // Handle form search submission
+//        document.getElementById("searchDocumentForm").addEventListener("submit", function (event) {
+//            event.preventDefault(); // Prevent the form from submitting and page reloading
+
+//            // Get the search input values
+//            //var schoolInput = document.getElementById("schoolInput").value;
+//            //var courseInput = document.getElementById("courseInput").value;
+//            var textInput = document.getElementById("textInput").value;
+
+
+  
+//            // Perform AJAX request to get search results
+//            var xhr = new XMLHttpRequest();
+//            //because we used hiddenInput.value for SchoolID and hiddenInput2.value for CourseID, so we can use them directly
+//            xhr.open("GET", "/Search/Search?SchoolID=" + hiddenInput.value +
+//                "&CourseID=" + hiddenInput2.value +
+//                "&textInput=" + encodeURIComponent(textInput), true);
+//            console.log(' works until here');
+
+//            xhr.onload = function () {
+//                console.log(' inside function is right');
+//                console.log(' xhr status',xhr.status);
+//                if (xhr.status === 200) {
+//                    //in visual studio we need to use xhr.status === 200
+//                    //but in Azure we use xhr.status === 500
+
+//                    console.log(' xhr response text:', xhr.responseText);
+//                    var searchResults = JSON.parse(xhr.responseText);
+//                    console.log(' searchResults:', searchResults);
+//                    // Update the search results section with the received data
+//                    var searchResultsBody = document.getElementById("searchResultsBody");
+//                    searchResultsBody.innerHTML = ""; // Clear previous results
+
+//                    if (searchResults.length > 0) {
+//                        // Display search results
+//                        searchResults.forEach(function (result) {
+//                            var row = document.createElement("tr");
+
+//                            //-----------------------  if we want display all elements use below code:
+
+//                            //for (var prop in result) {
+//                            //    if (result.hasOwnProperty(prop)) {
+//                            //        var cell = document.createElement("td");
+//                            //        cell.textContent = result[prop];
+//                            //        row.appendChild(cell);
+//                            //    }
+//                            //}
+
+//                            //-----------------------
+//                            //if we only want display certain element, use below code instead
+
+
+                           
+//                            console.log(' Result:', result);
+
+
+
+//                            var nameCell = document.createElement("td");
+//                            var link = document.createElement("a");
+//                            link.href = "/Document/docview/" + result.universityName + "/" + result.courseName + "/" + result.name + "/" + result.documentID;
+//                            link.textContent = result.name;
+//                            nameCell.appendChild(link);
+//                            nameCell.classList.add("hyperlink"); // Add a CSS class for styling if desired
+//                            row.appendChild(nameCell);
+
+
+
+
+//                       //     var nameCell = document.createElement("td");
+//                            var image = document.createElement("img");
+//                            var originalLink = result.firstPageImageLink;
+//                            var imageURL = originalLink.replace(/^http:/, 'https:');   //we must use it because we need all https link, otherwise won't work
+                           
+//                        //   var imageURL = "https://pdffirstpageimage.oss-eu-central-1.aliyuncs.com/693438484?Expires=4844246788&OSSAccessKeyId=LTAI5tHfC1uRSqRZswqEo5EQ&Signature=f2YXlcI11LUgJanyED980Eq8D3w%3D"; // Replace with the URL of the byte array
+//                              // Fetch the byte array from the URL
+//                            fetch(imageURL)
+//                                .then(response => response.arrayBuffer())
+//                                .then(buffer => {
+//                                    // Convert byte array to base64-encoded image data
+//                                    var byteArray = new Uint8Array(buffer);
+//                                    var binaryData = [];
+//                                    for (var i = 0; i < byteArray.byteLength; i++) {
+//                                        binaryData.push(byteArray[i]);
+//                                    }
+//                                    var base64Data = btoa(String.fromCharCode.apply(null, binaryData));
+
+//                                    image.src = "data:image/png;base64," + base64Data;
+
+//                                    // Adjust the size of the displayed image
+//                                    image.style.width = "200px"; // Set the desired width
+//                                    image.style.height = "auto"; // Set height to "auto" for aspect ratio to be preserved
+
+//                                    nameCell.appendChild(image);
+                                   
+//                                })
+//                                .catch(error => {
+//                                    console.error("Failed to fetch or convert the byte array:", error);
+//                                });
+
+
+
+
+
+
+
+
+
+//                            var yearCell = document.createElement("td");
+//                            yearCell.textContent = result.year;
+//                            row.appendChild(yearCell);
+
+//                            //var categoryCell = document.createElement("td");
+//                            //categoryCell.textContent = result.category;
+//                            //row.appendChild(categoryCell);
+
+//                            var categoryCell = document.createElement("td");
+//var categoryValue = result.category;
+
+//switch (categoryValue) {
+//  case 0:
+//    categoryCell.textContent = "Lecture notes";
+//    break;
+//  case 1:
+//    categoryCell.textContent = "Practice materials";
+//    break;
+//  case 2:
+//    categoryCell.textContent = "Coursework";
+//    break;
+//  case 3:
+//    categoryCell.textContent = "Summaries";
+//    break;
+//  case 4:
+//    categoryCell.textContent = "Assignments";
+//    break;
+//  case 5:
+//    categoryCell.textContent = "Tutorial work";
+//    break;
+//  case 6:
+//    categoryCell.textContent = "Essays";
+//    break;
+//  case 7:
+//    categoryCell.textContent = "Other";
+//    break;
+//  default:
+//    categoryCell.textContent = "Unknown category";
+//    break;
+//}
+
+//row.appendChild(categoryCell);
+
+
+//                            var descriptionCell = document.createElement("td");
+//                            descriptionCell.textContent = result.description;
+//                            row.appendChild(descriptionCell);
+
+//                            var ratingCell = document.createElement("td");
+//                            if (result.rating==null){ratingCell.textContent = "none"} else{
+//                           ratingCell.textContent = result.rating;}
+//                            row.appendChild(ratingCell);
+
+//                            //-----------------------
+
+//                            searchResultsBody.appendChild(row);
+//                        });
+
+//                        // Show the search results section
+//                        document.getElementById("searchResultsSection").style.display = "block";
+//                    } else {
+//                        // No results found
+//                        searchResultsBody.innerHTML = "<tr><td colspan='2'>No results found.</td></tr>";
+//                        document.getElementById("searchResultsSection").style.display = "block";
+//                    }
+//                }
+//            };
+
+//            xhr.onerror = function() {
+//  console.log('Error occurred during the AJAX request.');
+//};
+//            xhr.send();
+//        });
+
+
+
+        //AJAX doesn't work in Azure, we must use javascript
         document.getElementById("searchDocumentForm").addEventListener("submit", function (event) {
             event.preventDefault(); // Prevent the form from submitting and page reloading
 
             // Get the search input values
-            //var schoolInput = document.getElementById("schoolInput").value;
-            //var courseInput = document.getElementById("courseInput").value;
             var textInput = document.getElementById("textInput").value;
 
-
-  
             // Perform AJAX request to get search results
-            var xhr = new XMLHttpRequest();
-            //because we used hiddenInput.value for SchoolID and hiddenInput2.value for CourseID, so we can use them directly
-            xhr.open("GET", "/Search/Search?SchoolID=" + hiddenInput.value +
-                "&CourseID=" + hiddenInput2.value +
-                "&textInput=" + encodeURIComponent(textInput), true);
-            console.log(' works until here');
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    var searchResults = JSON.parse(xhr.responseText);
+            fetch("/Search/Search?SchoolID=" + hiddenInput.value + "&CourseID=" + hiddenInput2.value + "&textInput=" + encodeURIComponent(textInput))
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Network response was not ok.');
+                    }
+                })
+                .then(searchResults => {
                     console.log(' searchResults:', searchResults);
+
                     // Update the search results section with the received data
                     var searchResultsBody = document.getElementById("searchResultsBody");
                     searchResultsBody.innerHTML = ""; // Clear previous results
@@ -323,25 +507,6 @@
                         searchResults.forEach(function (result) {
                             var row = document.createElement("tr");
 
-                            //-----------------------  if we want display all elements use below code:
-
-                            //for (var prop in result) {
-                            //    if (result.hasOwnProperty(prop)) {
-                            //        var cell = document.createElement("td");
-                            //        cell.textContent = result[prop];
-                            //        row.appendChild(cell);
-                            //    }
-                            //}
-
-                            //-----------------------
-                            //if we only want display certain element, use below code instead
-
-
-                           
-                            console.log(' Result:', result);
-
-
-
                             var nameCell = document.createElement("td");
                             var link = document.createElement("a");
                             link.href = "/Document/docview/" + result.universityName + "/" + result.courseName + "/" + result.name + "/" + result.documentID;
@@ -350,90 +515,44 @@
                             nameCell.classList.add("hyperlink"); // Add a CSS class for styling if desired
                             row.appendChild(nameCell);
 
-
-
-
-                       //     var nameCell = document.createElement("td");
-                            var image = document.createElement("img");
-                            var originalLink = result.firstPageImageLink;
-                            var imageURL = originalLink.replace(/^http:/, 'https:');   //we must use it because we need all https link, otherwise won't work
-                           
-                        //   var imageURL = "https://pdffirstpageimage.oss-eu-central-1.aliyuncs.com/693438484?Expires=4844246788&OSSAccessKeyId=LTAI5tHfC1uRSqRZswqEo5EQ&Signature=f2YXlcI11LUgJanyED980Eq8D3w%3D"; // Replace with the URL of the byte array
-                              // Fetch the byte array from the URL
-                            fetch(imageURL)
-                                .then(response => response.arrayBuffer())
-                                .then(buffer => {
-                                    // Convert byte array to base64-encoded image data
-                                    var byteArray = new Uint8Array(buffer);
-                                    var binaryData = [];
-                                    for (var i = 0; i < byteArray.byteLength; i++) {
-                                        binaryData.push(byteArray[i]);
-                                    }
-                                    var base64Data = btoa(String.fromCharCode.apply(null, binaryData));
-
-                                    image.src = "data:image/png;base64," + base64Data;
-
-                                    // Adjust the size of the displayed image
-                                    image.style.width = "200px"; // Set the desired width
-                                    image.style.height = "auto"; // Set height to "auto" for aspect ratio to be preserved
-
-                                    nameCell.appendChild(image);
-                                   
-                                })
-                                .catch(error => {
-                                    console.error("Failed to fetch or convert the byte array:", error);
-                                });
-
-
-
-
-
-
-
-
-
                             var yearCell = document.createElement("td");
                             yearCell.textContent = result.year;
                             row.appendChild(yearCell);
 
-                            //var categoryCell = document.createElement("td");
-                            //categoryCell.textContent = result.category;
-                            //row.appendChild(categoryCell);
-
                             var categoryCell = document.createElement("td");
-var categoryValue = result.category;
+                            var categoryValue = result.category;
 
-switch (categoryValue) {
-  case 0:
-    categoryCell.textContent = "Lecture notes";
-    break;
-  case 1:
-    categoryCell.textContent = "Practice materials";
-    break;
-  case 2:
-    categoryCell.textContent = "Coursework";
-    break;
-  case 3:
-    categoryCell.textContent = "Summaries";
-    break;
-  case 4:
-    categoryCell.textContent = "Assignments";
-    break;
-  case 5:
-    categoryCell.textContent = "Tutorial work";
-    break;
-  case 6:
-    categoryCell.textContent = "Essays";
-    break;
-  case 7:
-    categoryCell.textContent = "Other";
-    break;
-  default:
-    categoryCell.textContent = "Unknown category";
-    break;
-}
+                            switch (categoryValue) {
+                              case 0:
+                                categoryCell.textContent = "Lecture notes";
+                                break;
+                              case 1:
+                                categoryCell.textContent = "Practice materials";
+                                break;
+                              case 2:
+                                categoryCell.textContent = "Coursework";
+                                break;
+                              case 3:
+                                categoryCell.textContent = "Summaries";
+                                break;
+                              case 4:
+                                categoryCell.textContent = "Assignments";
+                                break;
+                              case 5:
+                                categoryCell.textContent = "Tutorial work";
+                                break;
+                              case 6:
+                                categoryCell.textContent = "Essays";
+                                break;
+                              case 7:
+                                categoryCell.textContent = "Other";
+                                break;
+                              default:
+                                categoryCell.textContent = "Unknown category";
+                                break;
+                            }
 
-row.appendChild(categoryCell);
+                            row.appendChild(categoryCell);
 
 
                             var descriptionCell = document.createElement("td");
@@ -441,11 +560,12 @@ row.appendChild(categoryCell);
                             row.appendChild(descriptionCell);
 
                             var ratingCell = document.createElement("td");
-                            if (result.rating==null){ratingCell.textContent = "none"} else{
-                           ratingCell.textContent = result.rating;}
+                            if (result.rating == null) {
+                                ratingCell.textContent = "none"
+                            } else {
+                                ratingCell.textContent = result.rating;
+                            }
                             row.appendChild(ratingCell);
-
-                            //-----------------------
 
                             searchResultsBody.appendChild(row);
                         });
@@ -457,10 +577,13 @@ row.appendChild(categoryCell);
                         searchResultsBody.innerHTML = "<tr><td colspan='2'>No results found.</td></tr>";
                         document.getElementById("searchResultsSection").style.display = "block";
                     }
-                }
-            };
-            xhr.send();
+                })
+                .catch(error => {
+                    console.error("There has been a problem with your fetch operation: ", error);
+                });
         });
+
+
     </script>
 
 

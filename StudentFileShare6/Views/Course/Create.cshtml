@@ -8,6 +8,7 @@
 
 <h4>Course</h4>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
@@ -70,6 +71,8 @@
 
 
     </div>
+
+   
 </div>
 
 @*<div>
@@ -180,7 +183,7 @@
                     }
 
                     // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
-                    schoolInput.addEventListener('change', function (event) {
+                    schoolInput.addEventListener('input', function (event) {
                         const selectedText = event.target.value;
                         const selectedOption = Array.from(datalistElement.options).find(option => option.text === selectedText);
 

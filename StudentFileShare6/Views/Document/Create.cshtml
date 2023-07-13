@@ -21,23 +21,23 @@
 <div class="row">
     <div class="col-md-4">
         <form id="createDocumentForm" asp-action="Create" enctype="multipart/form-data">
-                        @* we use multipart/form-data because will submit a file*@
+            @* we use multipart/form-data because will submit a file*@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             @if (User.Identity.IsAuthenticated)
             {
-                
+
             }
             else
             {
                 <div class="alert alert-danger">
                     Please log in first to upload a document.
                 </div>
-              
+
             }
 
 
-                        <div class="form-group" style="display: none;">
+            <div class="form-group" style="display: none;">
                 <label asp-for="DocumentID" class="control-label"></label>
                 <input asp-for="DocumentID" class="form-control" value="DefaultDocumentID" />
                 <span asp-validation-for="DocumentID" class="text-danger"></span>
@@ -52,7 +52,7 @@
 
             <div class="form-group">
                 <label asp-for="SchoolID" class="control-label">Please enter university name:</label>
-                <input type="text" id="schoolInput" class="form-control" autocomplete="off" list="universityList" required  />
+                <input type="text" id="schoolInput" class="form-control" autocomplete="off" list="universityList" required />
                 <datalist id="universityList"></datalist>
                 <input type="hidden" asp-for="SchoolID" />
             </div>
@@ -61,8 +61,8 @@
 
             <div class="form-group">
                 <label asp-for="CourseID" class="control-label">Please enter course name:</label>
-                <input type="text" id="courseInput" class="form-control" autocomplete="off" list="courseList" required disabled/>
-              @*  disabled unless select "schoolInput" first*@
+                <input type="text" id="courseInput" class="form-control" autocomplete="off" list="courseList" required disabled />
+                @*  disabled unless select "schoolInput" first*@
                 <datalist id="courseList"></datalist>
                 <input type="hidden" asp-for="CourseID" />
             </div>
@@ -81,7 +81,7 @@
             </div>
 
 
-         
+
             <div class="form-group">
                 <label asp-for="Category" class="control-label"></label>
                 <select asp-for="Category" class="form-control">
@@ -104,13 +104,13 @@
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-       
+
             <div class="form-group form-check">
                 <label class="form-check-label">
                     <input class="form-check-input" asp-for="Anonymous" /> @Html.DisplayNameFor(model => model.Anonymous)
                 </label>
             </div>
-       
+
             <div class="form-group" style="display: none;">
                 <label asp-for="UserID" class="control-label"> </label>
                 <input asp-for="UserID" class="form-control" value="@userId" />
@@ -132,7 +132,7 @@
                 <span id="fileInputError" class="text-danger"></span>
             </div>
 
-            
+
 
             @if (User.Identity.IsAuthenticated)
             {
@@ -142,7 +142,7 @@
             }
             else
             {
-               
+
                 <div class="form-group">
                     <input type="submit" value="Create" class="btn btn-primary" disabled />
                 </div>
@@ -162,152 +162,170 @@
 
 
             @*  Razor syntax does not allow assigning values to HTML attributes directly using variables.*@
-    
+
 
 
 
         </form>
     </div>
+    <div class="col-md-6 col-md-offset-2">
+        <p>Existing courses:</p>
+
+        <p>
+            <strong>Lund University:</strong><br>
+            Database<br>
+            Discrete Mathematics
+        </p>
+
+        <p>
+            <strong>Lulea University:</strong><br>
+            Accounting<br>
+            Aerospace Engineering
+        </p>
+        <h4>Note:</h4>
+     <p>When I click "<strong><span style="color:red;">Create</span></strong>" button, if I run it in Visual Studio it works well, but in Azure APP I got an <strong><span style="color:red;">error</span></strong>. The error is on the server side, and it asks me to "<strong>wapping to Development environment will display more detailed information about the error that occurred.</strong>"</p>
+        <p>But because my current pricing plan is <strong><span style="color:red;">free</span></strong>, so I <strong><span style="color:red;">cannot</span></strong> swap to development mode and solve the issue (it needs a paid plan to be able to swap and see what is going on in Azure server). So, I suggest you not to use the "<strong><span style="color:red;">Create</span></strong>" button for uploading documents. Other stuff works well.</p>
+    </div>
 </div>
 
 <div>
-  @*  <a asp-action="Index">Back to List</a>*@
+    @*  <a asp-action="Index">Back to List</a>*@
     <a href="@Url.Content("/home/index")">Back to home</a>
 </div>
 
 <div>
-<p>
-Here's an overview of the features implemented in the provided view and controller:
-</p>
+    <p>
+        Here's an overview of the features implemented in the provided view and controller:
+    </p>
 
-<h3>1. Dynamic File Upload Progress Bar:</h3>
-<p>
-   - The controller action <code>Create</code> includes a file upload functionality.<br>
-   - During the file upload, the progress is tracked and updated in real-time.<br>
-   - The <code>streamProgressCallbackAsync</code> method is invoked during the upload process and updates the upload progress percentage.<br>
-   - SignalR is used to send the progress updates to connected clients.<br>
-   - The connected clients can receive the progress updates and dynamically display them as a progress bar on the user interface.<br>
-   - The progress bar provides real-time feedback to the user, enhancing the user experience and indicating the progress of the file upload.
-</p>
+    <h3>1. Dynamic File Upload Progress Bar:</h3>
+    <p>
+        - The controller action <code>Create</code> includes a file upload functionality.<br>
+        - During the file upload, the progress is tracked and updated in real-time.<br>
+        - The <code>streamProgressCallbackAsync</code> method is invoked during the upload process and updates the upload progress percentage.<br>
+        - SignalR is used to send the progress updates to connected clients.<br>
+        - The connected clients can receive the progress updates and dynamically display them as a progress bar on the user interface.<br>
+        - The progress bar provides real-time feedback to the user, enhancing the user experience and indicating the progress of the file upload.
+    </p>
 
-<h3>2. Asynchronous File Upload:</h3>
-<p>
-   - The file upload action <code>Create</code> utilizes asynchronous programming using the <code>async</code> and <code>await</code> keywords.<br>
-   - Asynchronous file upload enables non-blocking execution, allowing the application to remain responsive during the upload process.<br>
-   - This ensures that other user interactions can still be handled while the file is being uploaded.
-</p>
+    <h3>2. Asynchronous File Upload:</h3>
+    <p>
+        - The file upload action <code>Create</code> utilizes asynchronous programming using the <code>async</code> and <code>await</code> keywords.<br>
+        - Asynchronous file upload enables non-blocking execution, allowing the application to remain responsive during the upload process.<br>
+        - This ensures that other user interactions can still be handled while the file is being uploaded.
+    </p>
 
-<h3>3. Base64-Encoded Image Generation:</h3>
-<p>
-   - The <code>StoreCompressedScreenshotInDatabase</code> method generates a base64-encoded image of the first page of a PDF document.<br>
-   - This method converts the first page of the uploaded PDF file into an image format (JPEG).<br>
-   - The resulting image is then encoded as a base64 string, which can be stored in the database or used for further processing.
-</p>
+    <h3>3. Base64-Encoded Image Generation:</h3>
+    <p>
+        - The <code>StoreCompressedScreenshotInDatabase</code> method generates a base64-encoded image of the first page of a PDF document.<br>
+        - This method converts the first page of the uploaded PDF file into an image format (JPEG).<br>
+        - The resulting image is then encoded as a base64 string, which can be stored in the database or used for further processing.
+    </p>
 
-<h3>4. Real-Time Updates with SignalR:</h3>
-<p>
-   - SignalR, a real-time communication library, is utilized to provide live updates during the file upload process.<br>
-   - The <code>IHubContext&lt;ProgressHub&gt;</code> is injected into the controller's constructor, enabling communication with connected clients.<br>
-   - The <code>streamProgressCallbackAsync</code> method sends updates to connected clients, which can be displayed in real-time on the user interface.<br>
-   - This real-time update feature enhances the user experience by providing visual feedback on the progress of the file upload.
-</p>
+    <h3>4. Real-Time Updates with SignalR:</h3>
+    <p>
+        - SignalR, a real-time communication library, is utilized to provide live updates during the file upload process.<br>
+        - The <code>IHubContext&lt;ProgressHub&gt;</code> is injected into the controller's constructor, enabling communication with connected clients.<br>
+        - The <code>streamProgressCallbackAsync</code> method sends updates to connected clients, which can be displayed in real-time on the user interface.<br>
+        - This real-time update feature enhances the user experience by providing visual feedback on the progress of the file upload.
+    </p>
 
-<h3>5. Database Interaction with Entity Framework Core:</h3>
-<p>
-   - The controller interacts with a database using Entity Framework Core.<br>
-   - It includes methods for querying, creating, updating, and deleting records in the database.<br>
-   - In this case, the database is used to store information related to uploaded documents, such as the document's metadata and file links.
-</p>
+    <h3>5. Database Interaction with Entity Framework Core:</h3>
+    <p>
+        - The controller interacts with a database using Entity Framework Core.<br>
+        - It includes methods for querying, creating, updating, and deleting records in the database.<br>
+        - In this case, the database is used to store information related to uploaded documents, such as the document's metadata and file links.
+    </p>
 
-<h3>6. JSON Responses:</h3>
-<p>
-   - The controller includes actions that return JSON responses, such as <code>GetUniversities</code>, <code>GetCourses</code>, <code>ifUniversityExist</code>, and <code>ifCourseExist</code>.<br>
-   - These actions are called asynchronously from JavaScript code and return JSON data.<br>
-   - JSON responses enable dynamic updates of the user interface without requiring a full page reload, improving performance and interactivity.
-</p>
+    <h3>6. JSON Responses:</h3>
+    <p>
+        - The controller includes actions that return JSON responses, such as <code>GetUniversities</code>, <code>GetCourses</code>, <code>ifUniversityExist</code>, and <code>ifCourseExist</code>.<br>
+        - These actions are called asynchronously from JavaScript code and return JSON data.<br>
+        - JSON responses enable dynamic updates of the user interface without requiring a full page reload, improving performance and interactivity.
+    </p>
 
-<h3>About some functions I used:</h3>
+    <h3>About some functions I used:</h3>
 
-<h4>1. UserUploadedDocumentsPage Function:</h4>
-<p>
-   - Similar to the <code>Index</code> function, the <code>UserUploadedDocumentsPage</code> function retrieves a list of documents from the database and passes it to the corresponding view.<br>
-   - It also fetches the base64-encoded image for each document and adds it to the <code>ViewData</code> dictionary.
-</p>
+    <h4>1. UserUploadedDocumentsPage Function:</h4>
+    <p>
+        - Similar to the <code>Index</code> function, the <code>UserUploadedDocumentsPage</code> function retrieves a list of documents from the database and passes it to the corresponding view.<br>
+        - It also fetches the base64-encoded image for each document and adds it to the <code>ViewData</code> dictionary.
+    </p>
 
-<h4>2. Create Function:</h4>
-<p>
-   - The <code>Create</code> function initializes a new <code>Document</code> object and passes it to the corresponding view for displaying a form to create a new document.<br>
-   - It also handles the HTTP POST request for creating a new document.<br>
-   - File upload functionality is included, where a file is uploaded, stored in Aliyun OSS, and relevant details are saved in the database.<br>
-   - The function performs form validation and redirects to appropriate views based on the outcome.
-</p>
+    <h4>2. Create Function:</h4>
+    <p>
+        - The <code>Create</code> function initializes a new <code>Document</code> object and passes it to the corresponding view for displaying a form to create a new document.<br>
+        - It also handles the HTTP POST request for creating a new document.<br>
+        - File upload functionality is included, where a file is uploaded, stored in Aliyun OSS, and relevant details are saved in the database.<br>
+        - The function performs form validation and redirects to appropriate views based on the outcome.
+    </p>
 
-<h4>3. GetUniversities Function:</h4>
-<p>
-   - The <code>GetUniversities</code> function retrieves a list of universities from the database based on a search query.<br>
-   - It filters universities whose names start with the provided search text and returns the matching universities as JSON data.
-</p>
+    <h4>3. GetUniversities Function:</h4>
+    <p>
+        - The <code>GetUniversities</code> function retrieves a list of universities from the database based on a search query.<br>
+        - It filters universities whose names start with the provided search text and returns the matching universities as JSON data.
+    </p>
 
-<h4>4. GetCourses Function:</h4>
-<p>
-   - The <code>GetCourses</code> function retrieves a list of courses from the database based on a search query and the selected school ID.<br>
-   - It filters courses whose names start with the provided search text and are associated with the selected school ID.<br>
-   - The matching courses are returned as JSON data.
-</p>
+    <h4>4. GetCourses Function:</h4>
+    <p>
+        - The <code>GetCourses</code> function retrieves a list of courses from the database based on a search query and the selected school ID.<br>
+        - It filters courses whose names start with the provided search text and are associated with the selected school ID.<br>
+        - The matching courses are returned as JSON data.
+    </p>
 
-<p>
-These features collectively demonstrate the implementation of a dynamic file upload process with a progress bar, real-time updates using SignalR, and efficient handling of file-related operations. They showcase my proficiency in building modern and interactive web applications, enhancing user experience and providing responsive feedback during file uploads.
-</p>
+    <p>
+        These features collectively demonstrate the implementation of a dynamic file upload process with a progress bar, real-time updates using SignalR, and efficient handling of file-related operations. They showcase my proficiency in building modern and interactive web applications, enhancing user experience and providing responsive feedback during file uploads.
+    </p>
 
 
 </div>
 
 
 @section Scripts {
-    
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
 
-        <script src="~/js/fileUploadProgressBar.js"></script>
-       @* in the "js" folder in "wwwroot" folder*@
-        <script src="~/js/signalr/dist/browser/signalr.js"></script>
-        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
 
-        <script>
+    <script src="~/js/fileUploadProgressBar.js"></script>
+    @* in the "js" folder in "wwwroot" folder*@
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+
+
+    <script>
         //we want make sure the user only select "pdf" and within 10MB
-    document.getElementById('fileInput').addEventListener('change', function (event) {
-        var file = event.target.files[0];
-        var fileSize = file.size / 1024 / 1024; // Size in MB
+        document.getElementById('fileInput').addEventListener('input', function (event) {
+            var file = event.target.files[0];
+            var fileSize = file.size / 1024 / 1024; // Size in MB
 
-        if (!file.type.match('application/pdf')) {
-            document.getElementById('fileInputError').textContent = 'Please select a PDF file.';
-            event.target.value = ''; // Clear the file input
-            return;
-        }
+            if (!file.type.match('application/pdf')) {
+                document.getElementById('fileInputError').textContent = 'Please select a PDF file.';
+                event.target.value = ''; // Clear the file input
+                return;
+            }
 
-        if (fileSize > 10) {
-            document.getElementById('fileInputError').textContent = 'File size must be less than 10MB.';
-            event.target.value = ''; // Clear the file input
-            return;
-        }
+            if (fileSize > 10) {
+                document.getElementById('fileInputError').textContent = 'File size must be less than 10MB.';
+                event.target.value = ''; // Clear the file input
+                return;
+            }
 
-        document.getElementById('fileInputError').textContent = '';
-    });
-</script>
+            document.getElementById('fileInputError').textContent = '';
+        });
+    </script>
 
-        
 
-         <script>
-//for file uploading progress bar
+
+    <script>
+        //for file uploading progress bar
         connection.on("UpdateFileProgressIdentifier", (fileID, progressPercentage) => {
             // Handle the received parameters
-           // console.log("test1");
-            updateProgressBar("@progressBarId","@progressTextId",progressPercentage);
+            // console.log("test1");
+            updateProgressBar("@progressBarId", "@progressTextId", progressPercentage);
             //we MUST put updateProgressBar() before console.log() because if not, then after console.log() being executed then it execute updateProgressBar() but we can't see, because it is too late
             console.log("Received parameters:", fileID, progressPercentage);
 
-           
 
-           
+
+
         });
 
 
@@ -330,21 +348,21 @@ These features collectively demonstrate the implementation of a dynamic file upl
             if (inputText.length === 0) {
                 datalistElement.innerHTML = ''; // Clear the datalist if the input is empty
             } else {
-              
-              //  console.log(inputText);   //works well
+
+                //  console.log(inputText);   //works well
                 getUniversities(inputText);
             }
         });
 
         function getUniversities(searchText) {
             fetch(`/Document/GetUniversities?searchText=${searchText}`)
-                //the GetUniversities function in DocumentController.cs is not directly called in the Create.cshtml file. 
+                //the GetUniversities function in DocumentController.cs is not directly called in the Create.cshtml file.
                 // Instead, it is called asynchronously from JavaScript code using the fetch API.
                 .then(response => response.json())
                 .then(data => {
                     datalistElement.innerHTML = ''; // Clear the datalist
-             //       console.log(data); // Log the response data to the console, works well
-            //        console.log(typeof(data));
+                    //       console.log(data); // Log the response data to the console, works well
+                    //        console.log(typeof(data));
                     //if the typeof(data) is showing "object" instead of an array, it suggests that the data variable is an object rather than an array.
                     for (const key in data) {
                         // iterate over the enumerable properties of an object.
@@ -355,13 +373,13 @@ These features collectively demonstrate the implementation of a dynamic file upl
                             const optionElement = document.createElement('option');
                             optionElement.text = university.name + " (" + university.location + ")";
                             optionElement.setAttribute('data-value', university.schoolID);
-                          //  console.log(university.name);   //works well
+                            //  console.log(university.name);   //works well
                             datalistElement.appendChild(optionElement);
                         }
                     }
 
                     // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
-                    schoolInput.addEventListener('change', function (event) {
+                    schoolInput.addEventListener('input', function (event) {
                         const selectedText = event.target.value;
                         const selectedOption = Array.from(datalistElement.options).find(option => option.text === selectedText);
 
@@ -370,8 +388,8 @@ These features collectively demonstrate the implementation of a dynamic file upl
                             hiddenInput.value = selectedValue;
                             console.log('Selected UniversityID Value:', selectedValue);
                             SelectedSchoolID = hiddenInput.value;    //for select course only in that university
-                        //    console.log(' SelectedSchoolID:', SelectedSchoolID);
-                            console.log(typeof(SelectedSchoolID));
+                            //    console.log(' SelectedSchoolID:', SelectedSchoolID);
+                            console.log(typeof (SelectedSchoolID));
                         } else {
                             hiddenInput.value = '';
                             console.log('Selected UniversityID Value: None');
@@ -380,21 +398,21 @@ These features collectively demonstrate the implementation of a dynamic file upl
                 });
         }
     </script>
-    
-      <script>
-          //undisable "course" selection when the user has selected something from "university"
-        
-        document.getElementById('schoolInput').addEventListener('change', function () {
+
+    <script>
+        //undisable "course" selection when the user has selected something from "university"
+
+        document.getElementById('schoolInput').addEventListener('input', function () {
             //The "change" event listener will be triggered when the user selects an option from a dropdown, but not when they simply enter text in the input field (we use "input" if we want to detect if the user entered something).
             var secondInput = document.getElementById('courseInput');
             secondInput.disabled = false;
         });
 
     </script>
-     
+
     <script>
         //For courses
-        
+
         const inputElement2 = document.getElementById('courseInput');
         const datalistElement2 = document.getElementById('courseList');
         const hiddenInput2 = document.querySelector('input[type="hidden"][name="CourseID"]');
@@ -414,7 +432,7 @@ These features collectively demonstrate the implementation of a dynamic file upl
 
         function getCourses(searchText2) {
             fetch(`/Document/GetCourses?searchText=${searchText2}&SelectedSchoolID=${SelectedSchoolID}`)
-  
+
                 //the GetUniversities function in DocumentController.cs is not directly called in the Create.cshtml file.
                 // Instead, it is called asynchronously from JavaScript code using the fetch API.
                 .then(response => response.json())
@@ -428,17 +446,17 @@ These features collectively demonstrate the implementation of a dynamic file upl
                         if (data.hasOwnProperty(key)) {
                             //The hasOwnProperty() method is used to ensure that the property belongs directly to the data object itself and not to its prototype chain.
                             const course = data[key];
-                               console.log(course);  // works well
+                            console.log(course);  // works well
                             const optionElement = document.createElement('option');
                             optionElement.text = course.name;
                             optionElement.setAttribute('data-value', course.courseID);
-                         //   console.log(course.name);   //works well
+                            //   console.log(course.name);   //works well
                             datalistElement2.appendChild(optionElement);
                         }
                     }
 
                     // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
-                    courseInput.addEventListener('change', function (event) {
+                    courseInput.addEventListener('input', function (event) {
                         const selectedText = event.target.value;
                         const selectedOption = Array.from(datalistElement2.options).find(option => option.text === selectedText);
 
@@ -458,22 +476,22 @@ These features collectively demonstrate the implementation of a dynamic file upl
 
     <script>
         //ask user must select from datalist of courseList
-    document.querySelector('form').addEventListener('submit', function(event) {
-        var input = document.getElementById('courseInput');
+        document.querySelector('form').addEventListener('submit', function (event) {
+            var input = document.getElementById('courseInput');
             var options = document.getElementById('courseList').options;
-        var value = input.value;
+            var value = input.value;
 
-        var match = Array.from(options).find(function(option) {
-            return option.value === value;
+            var match = Array.from(options).find(function (option) {
+                return option.value === value;
+            });
+
+            if (!match) {
+                event.preventDefault(); // Prevent form submission
+                alert('After select a valid university from the list, select a valid course option from the list.');
+            }
         });
 
-        if (!match) {
-            event.preventDefault(); // Prevent form submission
-            alert('After select a valid university from the list, select a valid course option from the list.');
-        }
-    });
-        
-</script>
+    </script>
 
 
 
@@ -502,5 +520,4 @@ These features collectively demonstrate the implementation of a dynamic file upl
         }
 
 </style>
-
 

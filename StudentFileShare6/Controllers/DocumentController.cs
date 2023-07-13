@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -40,8 +41,8 @@ namespace StudentFileShare6.Controllers
         {
             _context = context;
             _hubContext = hubContext;
-          
-            _courseContext=courseContext;
+
+            _courseContext = courseContext;
             _universityContext = universityContext;
 
         }
@@ -55,7 +56,7 @@ namespace StudentFileShare6.Controllers
             // Fetch the base64-encoded image for each document and add it to the ViewData dictionary
             foreach (var document in documents)
             {
-               string imageUrl = document.FirstPageImageLink; 
+                string imageUrl = document.FirstPageImageLink;
                 ViewData[document.DocumentID.ToString()] = imageUrl;
             }
 
@@ -109,13 +110,13 @@ namespace StudentFileShare6.Controllers
         {
             //the GetUniversities function is not directly called in the Create.cshtml file. Instead, it is called asynchronously from JavaScript code using the fetch API
             List<University> universities = _universityContext.Universities.ToList();
-           var matchingUniversities = universities
-                .Where(u => ((u.Name).ToLower()).StartsWith(searchText.ToLower()))
-                //  .Where(u => ((u.Name).ToLower()).Contains(searchText.ToLower()))
-                //  we want if user enter small case it can match what we got in the database
-                .Select(u => new { Name = u.Name, SchoolID = u.SchoolID,Location=u.Location })
-                .Take(10)
-                .ToList();
+            var matchingUniversities = universities
+                 .Where(u => ((u.Name).ToLower()).StartsWith(searchText.ToLower()))
+                 //  .Where(u => ((u.Name).ToLower()).Contains(searchText.ToLower()))
+                 //  we want if user enter small case it can match what we got in the database
+                 .Select(u => new { Name = u.Name, SchoolID = u.SchoolID, Location = u.Location })
+                 .Take(10)
+                 .ToList();
             //When using var, we declare implicit type variables, the compiler infers the variable’s type from its value automatically
             return Json(matchingUniversities);
         }
@@ -124,13 +125,13 @@ namespace StudentFileShare6.Controllers
         public IActionResult GetCourses(string searchText, string SelectedSchoolID)
         {
             //the GetUniversities function is not directly called in the Create.cshtml file. Instead, it is called asynchronously from JavaScript code using the fetch API
-           List<Course> courses = _courseContext.Course.ToList();
-           var matchingCourses = courses
-                 .Where(u => ((u.CourseName).ToLower()).StartsWith(searchText.ToLower()) && u.SchoolID == SelectedSchoolID)
-                 //.Where(u => ((u.CourseName).ToLower()).Contains(searchText.ToLower()) && u.SchoolID == SelectedSchoolID)
-                 .Select(u => new { Name = u.CourseName, CourseID = u.CourseID })
-                 .Take(10)
-                 .ToList();
+            List<Course> courses = _courseContext.Course.ToList();
+            var matchingCourses = courses
+                  .Where(u => ((u.CourseName).ToLower()).StartsWith(searchText.ToLower()) && u.SchoolID == SelectedSchoolID)
+                  //.Where(u => ((u.CourseName).ToLower()).Contains(searchText.ToLower()) && u.SchoolID == SelectedSchoolID)
+                  .Select(u => new { Name = u.CourseName, CourseID = u.CourseID })
+                  .Take(10)
+                  .ToList();
             //When using var, we declare implicit type variables, the compiler infers the variable’s type from its value automatically
             return Json(matchingCourses);
         }
@@ -195,13 +196,13 @@ namespace StudentFileShare6.Controllers
 
             if (ModelState.IsValid)
             {
-               
+
 
                 document.GenerateRandomDocumentID(_context);
 
                 if (file != null && file.Length > 0)
                 {
-                  
+
 
 
                     var configuration = new ConfigurationBuilder()
@@ -246,23 +247,23 @@ namespace StudentFileShare6.Controllers
                     var ossClient = new OssClient(endpoint, accessKeyId, accessKeySecret);
 
 
-                   
+
 
                     //---------------------------below for the link to the full file
 
-                  //
+                    //
 
                     var putObjectRequest = new PutObjectRequest(bucketName, fileName, fileStream);
                     putObjectRequest.StreamTransferProgress += (object sender, StreamTransferProgressArgs args) => streamProgressCallbackAsync(sender, args, document, document.DocumentID, _hubContext);
-                    
+
 
                     ossClient.PutObject(putObjectRequest);
-                  
+
 
 
                     var request = new GeneratePresignedUriRequest(bucketName, fileName, SignHttpMethod.Get);
                     request.Expiration = DateTime.UtcNow.AddYears(100); // Set expiration to a distant future date, practically making it non-expiring
-                 
+
                     var objectUrl = ossClient.GeneratePresignedUri(request); // Generate the pre-signed URL
 
 
@@ -279,7 +280,7 @@ namespace StudentFileShare6.Controllers
                     byte[] byteArray = Convert.FromBase64String(base64String);
 
                     ossClient.PutObject(bucketForFirstPagePdf, document.DocumentID, new MemoryStream(byteArray));
-                 
+
 
                     var requestForPdfFirstPage = new GeneratePresignedUriRequest(bucketForFirstPagePdf, document.DocumentID, SignHttpMethod.Get);
                     requestForPdfFirstPage.Expiration = DateTime.UtcNow.AddYears(100); // Set expiration to a distant future date, practically making it non-expiring
@@ -299,8 +300,8 @@ namespace StudentFileShare6.Controllers
 
                 document.LikeNumber = 0;
                 document.DislikeNumber = 0;
-                document.Rating = null;
-
+              //  document.Rating = null;
+                document.Rating = 0;
                 _context.Add(document);
                 await _context.SaveChangesAsync();
                 //  return RedirectToAction(nameof(Index));    
@@ -326,8 +327,8 @@ namespace StudentFileShare6.Controllers
                 // Update the progress percentage
                 fileUploadProgress.ProgressPercentage = (int)progressPercentage;
                 // Broadcast the progress update to connected clients
-               
-           //We we need to activate progressHub here because we are passing fileID and progressPercentage 
+
+                //We we need to activate progressHub here because we are passing fileID and progressPercentage 
             }
 
             // Log the progress update
@@ -361,7 +362,7 @@ namespace StudentFileShare6.Controllers
                 }
             }
         }
-            
+
 
 
 
@@ -455,19 +456,19 @@ namespace StudentFileShare6.Controllers
             {
                 _context.Document.Remove(document);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool DocumentExists(string id)
         {
-          return (_context.Document?.Any(e => e.DocumentID == id)).GetValueOrDefault();
+            return (_context.Document?.Any(e => e.DocumentID == id)).GetValueOrDefault();
         }
 
 
 
-        
+
         public async Task<IActionResult> DocView(string schoolName, string courseName, string documentName, string documentID)
         {
             //to have own page for each file with a website template showing schoolName, courseName, documentName and documentID
@@ -482,17 +483,17 @@ namespace StudentFileShare6.Controllers
                 DocumentID = documentID
             };
 
-           
-                var theDocument = await _context.Document.FirstOrDefaultAsync(d => d.DocumentID == documentID); // Assuming "Documents" is the DbSet for your "Document" SQL table
-            //I want to find item in the "Document" SQL table that column "DocumentID" equals the "documentID" we have, then set "Link" of that "DocumentID" to "Link" of  this "model"
-                if (theDocument != null)
-                {
+
+            var theDocument = await _context.Document.FirstOrDefaultAsync(d => d.DocumentID == documentID); // Assuming "Documents" is the DbSet for your "Document" SQL table
+                                                                                                            //I want to find item in the "Document" SQL table that column "DocumentID" equals the "documentID" we have, then set "Link" of that "DocumentID" to "Link" of  this "model"
+            if (theDocument != null)
+            {
                 var httpsUrl = theDocument.Link.Replace("http://", "https://");
                 //because the link generated is http, and to display on website we need use https, so we do replace here
                 model.Link = httpsUrl;
                 model.LikeNumber = theDocument.LikeNumber;
                 model.DislikeNumber = theDocument.DislikeNumber;
-                model.Rating= theDocument.Rating;
+                model.Rating = theDocument.Rating;
             }
 
 
