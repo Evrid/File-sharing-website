@@ -8,6 +8,7 @@ https://studentfileweb.azurewebsites.net/
 
 ## About
 This repository contains the codebase for a file sharing website developed using .NET MVC, Razor syntax, HTML, JavaScript, AJAX, external libraries, CSS, and cookie handling. The project includes a user-friendly interface for uploading, searching, viewing, rating, and deleting documents.
+This project is for hosting on x64, if host on x86 then pdfium plugin won't work (cannot upload file), need to install Pdfiumviewer x86 in nuget package store in addition.
 
 ## Key Features
 
