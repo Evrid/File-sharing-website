@@ -6,6 +6,10 @@ see
 https://studentfileweb.azurewebsites.net/
 //My OSS subscription expire at Oct 24, 2023, means might not be able to see the files uploaded afterwards
 
+Complete files at:
+https://drive.google.com/file/d/1_6VsQ8h575oFzYp8j4v2FdBqrvh_-BeI/view?usp=sharing
+
+
 ## About
 This repository contains the codebase for a file sharing website developed using .NET MVC, Razor syntax, HTML, JavaScript, AJAX, external libraries, CSS, and cookie handling. The project includes a user-friendly interface for uploading, searching, viewing, rating, and deleting documents.
 This project is for hosting on x64, if host on x86 then pdfium plugin won't work (cannot upload file), need to install Pdfiumviewer x86 in nuget package store in addition.
