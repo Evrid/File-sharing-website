@@ -1,521 +1,645 @@
+@model Document
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using StudentFileShare6.data;
-using StudentFileShare6.Models;
-//using AliyunOss;
-using Aliyun.OSS;
-using System.IO;
-using Microsoft.AspNetCore.Http;
-using System.Net;
-using Aliyun.OSS.Common;
-using System.Security.AccessControl;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Microsoft.Identity.Client;
-using Microsoft.AspNetCore.SignalR;
-using StudentFileShare6.Hubs;
-using Microsoft.Extensions.Configuration;
-using System.Configuration;
-using System.Web;
-using PdfiumViewer;
-using System.Drawing;
-using System.Drawing.Imaging;
-using RestSharp;
+@{
+    ViewData["Title"] = "Index";
+}
 
-namespace StudentFileShare6.Controllers
-{
-    public class DocumentController : Controller
-    {
-        private readonly DocumentContext _context;
-        private readonly IHubContext<ProgressHub> _hubContext;
-        private readonly UniversityContext _universityContext;
-        private readonly CourseContext _courseContext;
+<h1>Index for search</h1>
 
 
-        public DocumentController(DocumentContext context, IHubContext<ProgressHub> hubContext, CourseContext courseContext, UniversityContext universityContext)
-        {
-            _context = context;
-            _hubContext = hubContext;
+<div class="row">
+    
+    @* <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>*@
+    <div class="col-md-4">
+    <form id="searchDocumentForm" enctype="multipart/form-data">
 
-            _courseContext = courseContext;
-            _universityContext = universityContext;
+        <div class="form-group">
+            <label asp-for="SchoolID" class="control-label">Please enter and select a university name:</label>
+            <input type="text" id="schoolInput" class="form-control" autocomplete="off" list="universityList" required />
+            <datalist id="universityList"></datalist>
+            <input type="hidden" asp-for="SchoolID" />
+        </div>
 
-        }
+        <div class="form-group">
+            <label asp-for="CourseID" class="control-label">Please enter and select a course name:</label>
+            <input type="text" id="courseInput" class="form-control" autocomplete="off" list="courseList" required disabled />
+            @*  disabled unless select "schoolInput" first*@
+            <datalist id="courseList"></datalist>
+            <input type="hidden" asp-for="CourseID" />
+        </div>
 
-        // GET: Document
-        public async Task<IActionResult> Index()
-        {
-            var documentContext = _context.Document.Include(d => d.Course).Include(d => d.University);
-            var documents = await documentContext.ToListAsync();
 
-            // Fetch the base64-encoded image for each document and add it to the ViewData dictionary
-            foreach (var document in documents)
-            {
-                string imageUrl = document.FirstPageImageLink;
-                ViewData[document.DocumentID.ToString()] = imageUrl;
+        <div>
+            <label for="textInput">File name:</label>
+            <input type="text" id="textInput" name="textInput">
+        </div>
+
+
+        <div class="form-group">
+            <input type="submit" value="Search" class="btn btn-primary" />
+        </div>
+    </form>
+
+        <div style="height: 100px"></div>
+
+    <div id="searchResultsSection" style="display: none;">
+        <h2>Search Results</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name and preview</th> 
+                    <th>Year</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Rating</th>
+                   @* <th>Anonymous</th>
+                    <th>User ID</th>
+                    <th>Link</th>
+                    <th>University</th>
+                    <th>Course</th>*@
+            </thead>
+            <tbody id="searchResultsBody">
+                <!-- Search results will be dynamically added here -->
+            </tbody>
+        </table>
+    </div>
+    </div>
+    <div class="col-md-6 col-md-offset-2">
+        <p>Existing courses:</p>
+
+        <p>
+            <strong>Lund University:</strong><br>
+            Database<br>
+            Discrete Mathematics
+        </p>
+
+        <p>
+            <strong>Lulea University:</strong><br>
+            Accounting<br>
+            Aerospace Engineering
+        </p>
+
+        <p>In each course, we have two "<strong>Lecture note</strong>" and two "<strong>Assignment</strong>".  </p>
+        <p>Make sure when you search, use the above information, such as "<strong>Lund University</strong>", "<strong>Database</strong>", "<strong>Assignment</strong>".</p>
+
+    </div>
+</div>
+
+
+
+    <div>
+        <p>My skills used in this page include:</p>
+        <p><strong>1. Form-based User Interface:</strong> The view presents a user interface that includes a form with input fields and a search button. Users can enter search criteria and submit the form to retrieve search results.</p>
+
+        <p><strong>2. Autocompletion:</strong> The input fields for university and course names utilize the <code>datalist</code> element to provide autocompletion suggestions based on user input. The suggestions are dynamically loaded from the server using AJAX requests.</p>
+
+        <p><strong>3. Dynamic Field Interactions:</strong> The view includes JavaScript code that enables/disable the course input field based on the selection of a university. This ensures that users can only select a course after selecting a university.</p>
+
+        <p><strong>4. Validation:</strong> The JavaScript code in the view validates the form submission by checking if a valid course option is selected before submitting the form. If the user has not selected a course after selecting a university, an alert message is displayed.</p>
+
+        <p><strong>5. Asynchronous Data Retrieval:</strong> The view uses the Fetch API to send asynchronous requests to the server and retrieve search results without reloading the page. This provides a smooth user experience and avoids interrupting the user's workflow.</p>
+
+        <p><strong>6. Dynamic Result Display:</strong> Upon receiving the search results from the server, the view dynamically updates the search results section by appending rows to the table. The results are displayed in a tabular format with columns for name, year, category, description, and rating.</p>
+
+        <p><strong>7. Image Display:</strong> The view retrieves and displays the first page image of each search result by fetching the image data from a provided URL. The images are resized and displayed alongside the respective search result.</p>
+
+        <p><strong>8. Conditional Result Handling:</strong> The view handles different scenarios based on the search results received. If search results are found, they are displayed in the table. If no results are found, a message is displayed indicating the absence of results.</p>
+
+        <p><strong>9. Client-Side Performance:</strong> By utilizing client-side rendering and AJAX requests, the view provides a responsive and efficient user experience. Users can retrieve search results without full page reloads, reducing server load and improving performance.</p>
+
+        <p><strong>10. Data Binding:</strong> The view is strongly typed with a model (<code>Document</code>), allowing for easy access to model properties in the view, such as <code>Model.Name</code> and <code>Model.CourseID</code>.</p>
+
+        <p>These features collectively enhance the user interface, improve usability, and provide a seamless search experience for users interacting with the application.</p>
+
+
+
+    </div>
+
+
+
+@section Scripts {
+
+ 
+
+
+
+    <script>
+        //For university
+        const inputElement = document.getElementById('schoolInput');
+        const datalistElement = document.getElementById('universityList');
+        const hiddenInput = document.querySelector('input[type="hidden"][name="SchoolID"]');
+        // When the user selects an option from the datalist, the corresponding value is set to the hidden input field (hiddenInput.value = selectedValue). This means that when the form is submitted, the value of the hidden input field will be included in the form data
+
+        var SelectedSchoolID;   //for select course only in the university
+
+
+        inputElement.addEventListener('input', function () {
+            const inputText = inputElement.value;
+            if (inputText.length === 0) {
+                datalistElement.innerHTML = ''; // Clear the datalist if the input is empty
+            } else {
+
+                //  console.log(inputText);   //works well
+                getUniversities(inputText);
             }
+        });
 
-            return View(documents);
-        }
-        // GET: Document/UserUploadedDocumentsPage
-        public async Task<IActionResult> UserUploadedDocumentsPage()
-        {
-            var documentContext = _context.Document.Include(d => d.Course).Include(d => d.University);
-            var documents = await documentContext.ToListAsync();
-
-            // Fetch the base64-encoded image for each document and add it to the ViewData dictionary
-            foreach (var document in documents)
-            {
-                string imageUrl = document.FirstPageImageLink;
-                ViewData[document.DocumentID.ToString()] = imageUrl;
-            }
-
-            return View(documents);
-        }
-
-        // GET: Document/Details/5
-        public async Task<IActionResult> Details(string id)
-        {
-            if (id == null || _context.Document == null)
-            {
-                return NotFound();
-            }
-
-            var document = await _context.Document
-                .Include(d => d.Course)
-                .Include(d => d.University)
-                .FirstOrDefaultAsync(m => m.DocumentID == id);
-            if (document == null)
-            {
-                return NotFound();
-            }
-
-            return View(document);
-        }
-
-        // GET: Document/Create
-        public IActionResult Create()
-        {
-            var document = new Document();
-            return View(document);
-        }
-
-        [HttpGet]
-        public IActionResult GetUniversities(string searchText)
-        {
-            //the GetUniversities function is not directly called in the Create.cshtml file. Instead, it is called asynchronously from JavaScript code using the fetch API
-            List<University> universities = _universityContext.Universities.ToList();
-            var matchingUniversities = universities
-                 .Where(u => ((u.Name).ToLower()).StartsWith(searchText.ToLower()))
-                 //  .Where(u => ((u.Name).ToLower()).Contains(searchText.ToLower()))
-                 //  we want if user enter small case it can match what we got in the database
-                 .Select(u => new { Name = u.Name, SchoolID = u.SchoolID, Location = u.Location })
-                 .Take(10)
-                 .ToList();
-            //When using var, we declare implicit type variables, the compiler infers the variable’s type from its value automatically
-            return Json(matchingUniversities);
-        }
-
-        [HttpGet]
-        public IActionResult GetCourses(string searchText, string SelectedSchoolID)
-        {
-            //the GetUniversities function is not directly called in the Create.cshtml file. Instead, it is called asynchronously from JavaScript code using the fetch API
-            List<Course> courses = _courseContext.Course.ToList();
-            var matchingCourses = courses
-                  .Where(u => ((u.CourseName).ToLower()).StartsWith(searchText.ToLower()) && u.SchoolID == SelectedSchoolID)
-                  //.Where(u => ((u.CourseName).ToLower()).Contains(searchText.ToLower()) && u.SchoolID == SelectedSchoolID)
-                  .Select(u => new { Name = u.CourseName, CourseID = u.CourseID })
-                  .Take(10)
-                  .ToList();
-            //When using var, we declare implicit type variables, the compiler infers the variable’s type from its value automatically
-            return Json(matchingCourses);
-        }
-
-
-
-
-
-        [HttpGet]
-        public IActionResult ifUniversityExist(string givenName, string givenLocation)
-        //To prevent the user from submitting the form if the university name already exists in the database
-        {
-            List<University> universities = _universityContext.Universities.ToList();
-            var matchingUniversities = universities
-                 .Where(u => u.Name.ToLower() == givenName.ToLower() && u.Location.ToLower() == givenLocation.ToLower())
-                 .Select(u => new { Name = u.Name, SchoolID = u.SchoolID, Location = u.Location })
-                 .Take(10)
-                 .ToList();
-
-            return Json(matchingUniversities);
-        }
-
-
-        [HttpGet]
-        public IActionResult ifCourseExist(string givenCourse, string SelectedSchoolID)
-        {
-            //the GetUniversities function is not directly called in the Create.cshtml file. Instead, it is called asynchronously from JavaScript code using the fetch API
-            List<Course> courses = _courseContext.Course.ToList();
-            var matchingCourses = courses
-                  .Where(u => ((u.CourseName).ToLower()).StartsWith(givenCourse.ToLower()) && u.SchoolID.ToLower() == SelectedSchoolID.ToLower())
-                  //.Where(u => ((u.CourseName).ToLower()).Contains(searchText.ToLower()) && u.SchoolID == SelectedSchoolID)
-                  .Select(u => new { Name = u.CourseName, CourseID = u.CourseID })
-                  .Take(10)
-                  .ToList();
-            //When using var, we declare implicit type variables, the compiler infers the variable’s type from its value automatically
-            return Json(matchingCourses);
-        }
-
-        // POST: Document/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DocumentID,Name,SchoolID,CourseID,Year,Category,Description,Anonymous,UserID,Link")] Document document, IFormFile file)
-        {
-
-
-            if (!ModelState.IsValid)
-            {
-                // Log validation errors
-                foreach (var modelStateEntry in ModelState.Values)
-                {
-                    foreach (var error in modelStateEntry.Errors)
-                    {
-                        System.Diagnostics.Debug.WriteLine(error.ErrorMessage);
+        function getUniversities(searchText) {
+            fetch(`/Document/GetUniversities?searchText=${searchText}`)
+                //the GetUniversities function in DocumentController.cs is not directly called in the Create.cshtml file.
+                // Instead, it is called asynchronously from JavaScript code using the fetch API.
+                .then(response => response.json())
+                .then(data => {
+                    datalistElement.innerHTML = ''; // Clear the datalist
+                    //       console.log(data); // Log the response data to the console, works well
+                    //        console.log(typeof(data));
+                    //if the typeof(data) is showing "object" instead of an array, it suggests that the data variable is an object rather than an array.
+                    for (const key in data) {
+                        // iterate over the enumerable properties of an object.
+                        if (data.hasOwnProperty(key)) {
+                            //The hasOwnProperty() method is used to ensure that the property belongs directly to the data object itself and not to its prototype chain.
+                            const university = data[key];
+                            console.log(university);  // works well
+                            const optionElement = document.createElement('option');
+                            optionElement.text = university.name + " (" + university.location + ")";
+                            optionElement.setAttribute('data-value', university.schoolID);
+                            //  console.log(university.name);   //works well
+                            datalistElement.appendChild(optionElement);
+                        }
                     }
-                }
+                    console.log("Before change event triggered")
+                    // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
+                    schoolInput.addEventListener('input', function (event) {
+                        //we must use "input", "change" work in visual studio but doesn't work in Azure
+                        console.log("After change event triggered")
+                        const selectedText = event.target.value;
+                        const selectedOption = Array.from(datalistElement.options).find(option => option.text === selectedText);
 
-                return View(document);
+                        if (selectedOption) {
+                            const selectedValue = selectedOption.getAttribute('data-value');
+                            hiddenInput.value = selectedValue;
+                            console.log('Selected UniversityID Value:', selectedValue);
+                            SelectedSchoolID = hiddenInput.value;    //for select course only in that university
+                            console.log(' SelectedSchoolID:', SelectedSchoolID);
+                            //  console.log(typeof (SelectedSchoolID));
+                            // Set the value of the hidden input field for school ID
+
+                        } else {
+                            hiddenInput.value = '';
+                            console.log('Selected UniversityID Value: None');
+
+                        }
+                    });
+                });
+        }
+    </script>
+
+    <script>
+        //undisable "course" selection when the user has selected something from "university"
+
+        document.getElementById('schoolInput').addEventListener('change', function () {
+            //The "change" event listener will be triggered when the user selects an option from a dropdown, but not when they simply enter text in the input field (we use "input" if we want to detect if the user entered something).
+            var secondInput = document.getElementById('courseInput');
+            secondInput.disabled = false;
+        });
+
+    </script>
+
+    <script>
+        //For courses
+
+        const inputElement2 = document.getElementById('courseInput');
+        const datalistElement2 = document.getElementById('courseList');
+        const hiddenInput2 = document.querySelector('input[type="hidden"][name="CourseID"]');
+        // When the user selects an option from the datalist, the corresponding value is set to the hidden input field. This means that when the form is submitted, the value of the hidden input field will be included in the form data
+
+
+        inputElement2.addEventListener('input', function () {
+            const inputText2 = inputElement2.value;
+            if (inputText2.length === 0) {
+                datalistElement2.innerHTML = ''; // Clear the datalist if the input is empty
+            } else {
+
+                  console.log(inputText2);   //works well
+                getCourses(inputText2);
             }
+        });
 
+        function getCourses(searchText2) {
+            fetch(`/Document/GetCourses?searchText=${searchText2}&SelectedSchoolID=${SelectedSchoolID}`)
 
-            if (ModelState.IsValid)
-            {
-
-
-                document.GenerateRandomDocumentID(_context);
-
-                if (file != null && file.Length > 0)
-                {
-
-
-
-                    var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-                    //I have put the connection details in appsettings.json
-                    var accessKeyId = configuration.GetSection("CloudOSSConnection")["accessKeyId"];
-                    var accessKeySecret = configuration.GetSection("CloudOSSConnection")["accessKeySecret"];
-                    var endpoint = configuration.GetSection("CloudOSSConnection")["endpoint"];
-                    var bucketName = configuration.GetSection("CloudOSSConnection")["bucketName"];
-                    var bucketForFirstPagePdf = configuration.GetSection("CloudOSSConnection")["bucketNameForFirstPagePdf"];
-                    // because for OSS, if you upload an object that has the same name as an existing object, the existing object is overwritten by the uploaded object
-                    //another method see https://www.alibabacloud.com/help/en/object-storage-service/latest/disable-overwrite-for-objects-with-the-same-name-3
-                    string fileName = Path.GetFileName(file.FileName);  // assuming fileName is "example.txt"
-                    string documentIDTemp = document.DocumentID;
-                    // Find the position of the dot in fileName
-                    int dotIndex = fileName.IndexOf(".");
-                    //to add document ID in front of the dot to let files have different names
-                    if (dotIndex != -1)
-                    {
-                        // Insert documentID in front of the dot
-                        fileName = fileName.Insert(dotIndex, documentIDTemp);
+                //the GetUniversities function in DocumentController.cs is not directly called in the Create.cshtml file.
+                // Instead, it is called asynchronously from JavaScript code using the fetch API.
+                .then(response => response.json())
+                .then(data => {
+                    console.log("got json reponse");
+                    console.log(data);
+                    datalistElement2.innerHTML = ''; // Clear the datalist
+                    //       console.log(data); // Log the response data to the console, works well
+                    //        console.log(typeof(data));
+                    //if the typeof(data) is showing "object" instead of an array, it suggests that the data variable is an object rather than an array.
+                    for (const key in data) {
+                        console.log(key);
+                        // iterate over the enumerable properties of an object.
+                        if (data.hasOwnProperty(key)) {
+                            //The hasOwnProperty() method is used to ensure that the property belongs directly to the data object itself and not to its prototype chain.
+                            const course = data[key];
+                            console.log(course);  // works well
+                            const optionElement = document.createElement('option');
+                            optionElement.text = course.name;
+                            optionElement.setAttribute('data-value', course.courseID);
+                            //   console.log(course.name);   //works well
+                            datalistElement2.appendChild(optionElement);
+                        }
                     }
 
+                    // Event listener to handle option selection, set the value of input “schoolID” to the corresponding “name” of the school user selected
+                    courseInput.addEventListener('input', function (event) {
+                        const selectedText = event.target.value;
+                        const selectedOption = Array.from(datalistElement2.options).find(option => option.text === selectedText);
 
-                    var fileStream = file.OpenReadStream();
-
-
-
-                    document.FileUploadProgresses = new List<FileUploadProgress>
-                    //for a progress bar show upload percenatge
-                      {
-                   new FileUploadProgress { FileID =document.DocumentID, ProgressPercentage = 0 }
-                        };
-
-
-
-
-
-
-                    var ossClient = new OssClient(endpoint, accessKeyId, accessKeySecret);
-
-
-
-
-                    //---------------------------below for the link to the full file
-
-                    //
-
-                    var putObjectRequest = new PutObjectRequest(bucketName, fileName, fileStream);
-                    //putObjectRequest.StreamTransferProgress += (object sender, StreamTransferProgressArgs args) => streamProgressCallbackAsync(sender, args, document, document.DocumentID, _hubContext);
-
-                    putObjectRequest.StreamTransferProgress += async (object sender, StreamTransferProgressArgs args) =>
-                    {
-                        await streamProgressCallbackAsync(sender, args, document, document.DocumentID, _hubContext);
-                    };
-
-
-                    ossClient.PutObject(putObjectRequest);
-
-
-
-                    var request = new GeneratePresignedUriRequest(bucketName, fileName, SignHttpMethod.Get);
-                    request.Expiration = DateTime.UtcNow.AddYears(100); // Set expiration to a distant future date, practically making it non-expiring
-
-                    var objectUrl = ossClient.GeneratePresignedUri(request); // Generate the pre-signed URL
-
-
-                    document.Link = objectUrl.ToString();
-
-                    //---------------------------above for the link to the full file
-
-                    //---------------------------below for the link to first page of pdf
-
-                    string base64String = StoreCompressedScreenshotInDatabase(file);  //return a base64 string that we can conver to image
-                                                                                      //  var putObjectRequestForFirstPagePdf = new PutObjectRequest(bucketForFirstPagePdf, fileName, fileStream);
-
-                    // Convert base64 string to byte array
-                    byte[] byteArray = Convert.FromBase64String(base64String);
-
-                    ossClient.PutObject(bucketForFirstPagePdf, document.DocumentID, new MemoryStream(byteArray));
-
-
-                    var requestForPdfFirstPage = new GeneratePresignedUriRequest(bucketForFirstPagePdf, document.DocumentID, SignHttpMethod.Get);
-                    requestForPdfFirstPage.Expiration = DateTime.UtcNow.AddYears(100); // Set expiration to a distant future date, practically making it non-expiring
-
-                    var objectUrlPdfFirstPage = ossClient.GeneratePresignedUri(requestForPdfFirstPage); // Generate the pre-signed URL
-
-
-                    document.FirstPageImageLink = objectUrlPdfFirstPage.ToString();
-
-
-
-
-                    //---------------------------above for the link to first page of pdf
-
-                }
-
-
-                document.LikeNumber = 0;
-                document.DislikeNumber = 0;
-                document.Rating = null;
-            
-                _context.Add(document);
-                await _context.SaveChangesAsync();
-                //  return RedirectToAction(nameof(Index));    
-
-                // return RedirectToAction("Index", "Home"); //redirect to "index" action of "home" controller
-
-                return RedirectToAction("DocumentCreateSuccess", "Document");   //redirect to "DocumentCreateSuccess" action of "Document" controller
-            }
-            //ViewData["CourseID"] = new SelectList(_context.Set<Course>(), "CourseID", "CourseID", document.CourseID);
-            //ViewData["SchoolID"] = new SelectList(_context.Set<University>(), "SchoolID", "SchoolID", document.SchoolID);
-            return View(document);
+                        if (selectedOption) {
+                            const selectedValue = selectedOption.getAttribute('data-value');
+                            hiddenInput2.value = selectedValue;
+                            console.log('Selected CourseID Value:', selectedValue);
+                        } else {
+                            hiddenInput2.value = '';
+                            console.log('Selected CourseID Value: None');
+                        }
+                    });
+                });
         }
+    </script>
 
-        public async Task<IActionResult> streamProgressCallbackAsync(object sender, StreamTransferProgressArgs args, Document document, string fileID, IHubContext<ProgressHub> progressHubContext)
-        //to display upload progress dynamically so we need use async
-        {
-            var progressPercentage = args.TransferredBytes * 100 / args.TotalBytes;
 
-            var fileUploadProgress = document.FileUploadProgresses.FirstOrDefault(f => f.FileID == fileID);
+    <script>
+        //ask user must select from datalist of courseList
+        document.querySelector('form').addEventListener('submit', function (event) {
+            var input = document.getElementById('courseInput');
+            var options = document.getElementById('courseList').options;
+            var value = input.value;
 
-            if (fileUploadProgress != null)
-            {
-                // Update the progress percentage
-                fileUploadProgress.ProgressPercentage = (int)progressPercentage;
-                // Broadcast the progress update to connected clients
+            var match = Array.from(options).find(function (option) {
+                return option.value === value;
+            });
 
-                //We we need to activate progressHub here because we are passing fileID and progressPercentage 
+            if (!match) {
+                event.preventDefault(); // Prevent form submission
+                alert('After select a valid university from the list, select a valid course option from the list.');
             }
+        });
 
-            // Log the progress update
-            System.Diagnostics.Debug.WriteLine($"Progress: {progressPercentage}%, TotalBytes: {args.TotalBytes}, TransferredBytes: {args.TransferredBytes}");
-
-            await _hubContext.Clients.All.SendAsync("UpdateFileProgressIdentifier", fileID, progressPercentage);
-            return Ok();
-        }
-
-        private string StoreCompressedScreenshotInDatabase(IFormFile file)
-        //take a screenshot of the first page of a pdf document after user uploaded as a base64-encoded image string and store in Aliyun OSS
-        {
-            using (var pdfDocument = PdfDocument.Load(file.OpenReadStream()))
-            {
-                using (var imageStream = new MemoryStream())
-                {
-                    var pdfPage = pdfDocument.Render(0, 300, 300, false); // Adjust width and height as needed
-
-                    EncoderParameters encoderParams = new EncoderParameters(1);
-                    encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 50L);
-
-                    ImageCodecInfo jpegCodec = ImageCodecInfo.GetImageDecoders().FirstOrDefault(codec => codec.FormatID == ImageFormat.Jpeg.Guid);
-
-                    pdfPage.Save(imageStream, jpegCodec, encoderParams);
-
-                    byte[] imageBytes = imageStream.ToArray();
-                    string base64Image = Convert.ToBase64String(imageBytes);
-
-                    return base64Image;    //works well, copy the value and remove the "" then we can convert to image online 
-                    //return a base64 string that we can conver to image for first page of pdf
-                }
-            }
-        }
+    </script>
 
 
 
 
 
-        // GET: Document/Edit/5
-        public async Task<IActionResult> Edit(string id)
-        {
-            if (id == null || _context.Document == null)
-            {
-                return NotFound();
-            }
+    <script>
+        //AJAX doesn't work in Azure, we must use javascript
 
-            var document = await _context.Document.FindAsync(id);
-            if (document == null)
-            {
-                return NotFound();
-            }
-            ViewData["CourseID"] = new SelectList(_context.Set<Course>(), "CourseID", "CourseID", document.CourseID);
-            ViewData["SchoolID"] = new SelectList(_context.Set<University>(), "SchoolID", "SchoolID", document.SchoolID);
-            return View(document);
-        }
+        // Handle form search submission
+//        document.getElementById("searchDocumentForm").addEventListener("submit", function (event) {
+//            event.preventDefault(); // Prevent the form from submitting and page reloading
 
-        // POST: Document/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("DocumentID,Name,SchoolID,CourseID,Year,Category,Description,Rating,Anonymous,UserID,Link")] Document document)
-        {
-            if (id != document.DocumentID)
-            {
-                return NotFound();
-            }
+//            // Get the search input values
+//            //var schoolInput = document.getElementById("schoolInput").value;
+//            //var courseInput = document.getElementById("courseInput").value;
+//            var textInput = document.getElementById("textInput").value;
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(document);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!DocumentExists(document.DocumentID))
-                    {
-                        return NotFound();
+
+  
+//            // Perform AJAX request to get search results
+//            var xhr = new XMLHttpRequest();
+//            //because we used hiddenInput.value for SchoolID and hiddenInput2.value for CourseID, so we can use them directly
+//            xhr.open("GET", "/Search/Search?SchoolID=" + hiddenInput.value +
+//                "&CourseID=" + hiddenInput2.value +
+//                "&textInput=" + encodeURIComponent(textInput), true);
+//            console.log(' works until here');
+
+//            xhr.onload = function () {
+//                console.log(' inside function is right');
+//                console.log(' xhr status',xhr.status);
+//                if (xhr.status === 200) {
+//                    //in visual studio we need to use xhr.status === 200
+//                    //but in Azure we use xhr.status === 500
+
+//                    console.log(' xhr response text:', xhr.responseText);
+//                    var searchResults = JSON.parse(xhr.responseText);
+//                    console.log(' searchResults:', searchResults);
+//                    // Update the search results section with the received data
+//                    var searchResultsBody = document.getElementById("searchResultsBody");
+//                    searchResultsBody.innerHTML = ""; // Clear previous results
+
+//                    if (searchResults.length > 0) {
+//                        // Display search results
+//                        searchResults.forEach(function (result) {
+//                            var row = document.createElement("tr");
+
+//                            //-----------------------  if we want display all elements use below code:
+
+//                            //for (var prop in result) {
+//                            //    if (result.hasOwnProperty(prop)) {
+//                            //        var cell = document.createElement("td");
+//                            //        cell.textContent = result[prop];
+//                            //        row.appendChild(cell);
+//                            //    }
+//                            //}
+
+//                            //-----------------------
+//                            //if we only want display certain element, use below code instead
+
+
+                           
+//                            console.log(' Result:', result);
+
+
+
+//                            var nameCell = document.createElement("td");
+//                            var link = document.createElement("a");
+//                            link.href = "/Document/docview/" + result.universityName + "/" + result.courseName + "/" + result.name + "/" + result.documentID;
+//                            link.textContent = result.name;
+//                            nameCell.appendChild(link);
+//                            nameCell.classList.add("hyperlink"); // Add a CSS class for styling if desired
+//                            row.appendChild(nameCell);
+
+
+
+
+//                       //     var nameCell = document.createElement("td");
+//                            var image = document.createElement("img");
+//                            var originalLink = result.firstPageImageLink;
+//                            var imageURL = originalLink.replace(/^http:/, 'https:');   //we must use it because we need all https link, otherwise won't work
+                           
+//                        //   var imageURL = "https://pdffirstpageimage.oss-eu-central-1.aliyuncs.com/693438484?Expires=4844246788&OSSAccessKeyId=LTAI5tHfC1uRSqRZswqEo5EQ&Signature=f2YXlcI11LUgJanyED980Eq8D3w%3D"; // Replace with the URL of the byte array
+//                              // Fetch the byte array from the URL
+//                            fetch(imageURL)
+//                                .then(response => response.arrayBuffer())
+//                                .then(buffer => {
+//                                    // Convert byte array to base64-encoded image data
+//                                    var byteArray = new Uint8Array(buffer);
+//                                    var binaryData = [];
+//                                    for (var i = 0; i < byteArray.byteLength; i++) {
+//                                        binaryData.push(byteArray[i]);
+//                                    }
+//                                    var base64Data = btoa(String.fromCharCode.apply(null, binaryData));
+
+//                                    image.src = "data:image/png;base64," + base64Data;
+
+//                                    // Adjust the size of the displayed image
+//                                    image.style.width = "200px"; // Set the desired width
+//                                    image.style.height = "auto"; // Set height to "auto" for aspect ratio to be preserved
+
+//                                    nameCell.appendChild(image);
+                                   
+//                                })
+//                                .catch(error => {
+//                                    console.error("Failed to fetch or convert the byte array:", error);
+//                                });
+
+
+
+
+
+
+
+
+
+//                            var yearCell = document.createElement("td");
+//                            yearCell.textContent = result.year;
+//                            row.appendChild(yearCell);
+
+//                            //var categoryCell = document.createElement("td");
+//                            //categoryCell.textContent = result.category;
+//                            //row.appendChild(categoryCell);
+
+//                            var categoryCell = document.createElement("td");
+//var categoryValue = result.category;
+
+//switch (categoryValue) {
+//  case 0:
+//    categoryCell.textContent = "Lecture notes";
+//    break;
+//  case 1:
+//    categoryCell.textContent = "Practice materials";
+//    break;
+//  case 2:
+//    categoryCell.textContent = "Coursework";
+//    break;
+//  case 3:
+//    categoryCell.textContent = "Summaries";
+//    break;
+//  case 4:
+//    categoryCell.textContent = "Assignments";
+//    break;
+//  case 5:
+//    categoryCell.textContent = "Tutorial work";
+//    break;
+//  case 6:
+//    categoryCell.textContent = "Essays";
+//    break;
+//  case 7:
+//    categoryCell.textContent = "Other";
+//    break;
+//  default:
+//    categoryCell.textContent = "Unknown category";
+//    break;
+//}
+
+//row.appendChild(categoryCell);
+
+
+//                            var descriptionCell = document.createElement("td");
+//                            descriptionCell.textContent = result.description;
+//                            row.appendChild(descriptionCell);
+
+//                            var ratingCell = document.createElement("td");
+//                            if (result.rating==null){ratingCell.textContent = "none"} else{
+//                           ratingCell.textContent = result.rating;}
+//                            row.appendChild(ratingCell);
+
+//                            //-----------------------
+
+//                            searchResultsBody.appendChild(row);
+//                        });
+
+//                        // Show the search results section
+//                        document.getElementById("searchResultsSection").style.display = "block";
+//                    } else {
+//                        // No results found
+//                        searchResultsBody.innerHTML = "<tr><td colspan='2'>No results found.</td></tr>";
+//                        document.getElementById("searchResultsSection").style.display = "block";
+//                    }
+//                }
+//            };
+
+//            xhr.onerror = function() {
+//  console.log('Error occurred during the AJAX request.');
+//};
+//            xhr.send();
+//        });
+
+
+
+        //AJAX doesn't work in Azure, we must use javascript
+        document.getElementById("searchDocumentForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent the form from submitting and page reloading
+
+            // Get the search input values
+            var textInput = document.getElementById("textInput").value;
+
+            // Perform AJAX request to get search results
+            fetch("/Search/Search?SchoolID=" + hiddenInput.value + "&CourseID=" + hiddenInput2.value + "&textInput=" + encodeURIComponent(textInput))
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Network response was not ok.');
                     }
-                    else
-                    {
-                        throw;
+                })
+                .then(searchResults => {
+                    console.log(' searchResults:', searchResults);
+
+                    // Update the search results section with the received data
+                    var searchResultsBody = document.getElementById("searchResultsBody");
+                    searchResultsBody.innerHTML = ""; // Clear previous results
+
+                    if (searchResults.length > 0) {
+                        // Display search results
+                        searchResults.forEach(function (result) {
+                            var row = document.createElement("tr");
+
+                            var nameCell = document.createElement("td");
+                            var link = document.createElement("a");
+                            link.href = "/Document/docview/" + result.universityName + "/" + result.courseName + "/" + result.name + "/" + result.documentID;
+                            link.textContent = result.name;
+                            nameCell.appendChild(link);
+                            nameCell.classList.add("hyperlink"); // Add a CSS class for styling if desired
+                            row.appendChild(nameCell);
+
+
+
+
+
+
+                      
+                                                        var image = document.createElement("img");
+                                                        var originalLink = result.firstPageImageLink;
+                                                        var imageURL = originalLink.replace(/^http:/, 'https:');   //we must use it because we need all https link, otherwise won't work
+
+                                                    //   var imageURL = "https://pdffirstpageimage.oss-eu-central-1.aliyuncs.com/693438484?Expires=4844246788&OSSAccessKeyId=LTAI5tHfC1uRSqRZswqEo5EQ&Signature=f2YXlcI11LUgJanyED980Eq8D3w%3D"; // Replace with the URL of the byte array
+                                                          // Fetch the byte array from the URL
+                                                        fetch(imageURL)
+                                                            .then(response => response.arrayBuffer())
+                                                            .then(buffer => {
+                                                                // Convert byte array to base64-encoded image data
+                                                                var byteArray = new Uint8Array(buffer);
+                                                                var binaryData = [];
+                                                                for (var i = 0; i < byteArray.byteLength; i++) {
+                                                                    binaryData.push(byteArray[i]);
+                                                                }
+                                                                var base64Data = btoa(String.fromCharCode.apply(null, binaryData));
+
+                                                                image.src = "data:image/png;base64," + base64Data;
+
+                                                                // Adjust the size of the displayed image
+                                                                image.style.width = "200px"; // Set the desired width
+                                                                image.style.height = "auto"; // Set height to "auto" for aspect ratio to be preserved
+
+                                                                nameCell.appendChild(image);
+
+                                                            })
+                                                            .catch(error => {
+                                                                console.error("Failed to fetch or convert the byte array:", error);
+                                                            });
+
+
+
+
+
+
+                            var yearCell = document.createElement("td");
+                            yearCell.textContent = result.year;
+                            row.appendChild(yearCell);
+
+                            var categoryCell = document.createElement("td");
+                            var categoryValue = result.category;
+
+                            switch (categoryValue) {
+                              case 0:
+                                categoryCell.textContent = "Lecture notes";
+                                break;
+                              case 1:
+                                categoryCell.textContent = "Practice materials";
+                                break;
+                              case 2:
+                                categoryCell.textContent = "Coursework";
+                                break;
+                              case 3:
+                                categoryCell.textContent = "Summaries";
+                                break;
+                              case 4:
+                                categoryCell.textContent = "Assignments";
+                                break;
+                              case 5:
+                                categoryCell.textContent = "Tutorial work";
+                                break;
+                              case 6:
+                                categoryCell.textContent = "Essays";
+                                break;
+                              case 7:
+                                categoryCell.textContent = "Other";
+                                break;
+                              default:
+                                categoryCell.textContent = "Unknown category";
+                                break;
+                            }
+
+                            row.appendChild(categoryCell);
+
+
+                            var descriptionCell = document.createElement("td");
+                            descriptionCell.textContent = result.description;
+                            row.appendChild(descriptionCell);
+
+                            var ratingCell = document.createElement("td");
+                            if (result.rating == null) {
+                                ratingCell.textContent = "none"
+                            } else {
+                                ratingCell.textContent = result.rating + "%";
+                            }
+                            row.appendChild(ratingCell);
+
+                            searchResultsBody.appendChild(row);
+                        });
+
+                        // Show the search results section
+                        document.getElementById("searchResultsSection").style.display = "block";
+                    } else {
+                        // No results found
+                        searchResultsBody.innerHTML = "<tr><td colspan='2'>No results found.</td></tr>";
+                        document.getElementById("searchResultsSection").style.display = "block";
                     }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CourseID"] = new SelectList(_context.Set<Course>(), "CourseID", "CourseID", document.CourseID);
-            ViewData["SchoolID"] = new SelectList(_context.Set<University>(), "SchoolID", "SchoolID", document.SchoolID);
-            return View(document);
-        }
+                })
+                .catch(error => {
+                    console.error("There has been a problem with your fetch operation: ", error);
+                });
+        });
 
-        // GET: Document/Delete/5
-        public async Task<IActionResult> Delete(string id)
-        {
-            if (id == null || _context.Document == null)
-            {
-                return NotFound();
-            }
 
-            var document = await _context.Document
-                .Include(d => d.Course)
-                .Include(d => d.University)
-                .FirstOrDefaultAsync(m => m.DocumentID == id);
-            if (document == null)
-            {
-                return NotFound();
-            }
-
-            return View(document);
-        }
-
-        // POST: Document/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
-        {
-            if (_context.Document == null)
-            {
-                return Problem("Entity set 'DocumentContext.Document'  is null.");
-            }
-            var document = await _context.Document.FindAsync(id);
-            if (document != null)
-            {
-                _context.Document.Remove(document);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool DocumentExists(string id)
-        {
-            return (_context.Document?.Any(e => e.DocumentID == id)).GetValueOrDefault();
-        }
+    </script>
 
 
 
 
-        public async Task<IActionResult> DocView(string schoolName, string courseName, string documentName, string documentID)
-        {
-            //to have own page for each file with a website template showing schoolName, courseName, documentName and documentID
-            //example link: https://localhost:7192/Document/docview/ABCSchool/Mathematics/SampleDocument/456
-            //before adding MapControllerRoute in Program.cs used https://localhost:7192/Document/DocView?schoolName=ABCSchool&courseName=Mathematics&documentName=SampleDocument&documentID=456
-
-            var model = new DocumentViewModel
-            {
-                SchoolName = schoolName,
-                CourseName = courseName,
-                DocumentName = documentName,
-                DocumentID = documentID
-            };
 
 
-            var theDocument = await _context.Document.FirstOrDefaultAsync(d => d.DocumentID == documentID); // Assuming "Documents" is the DbSet for your "Document" SQL table
-                                                                                                            //I want to find item in the "Document" SQL table that column "DocumentID" equals the "documentID" we have, then set "Link" of that "DocumentID" to "Link" of  this "model"
-            if (theDocument != null)
-            {
-                var httpsUrl = theDocument.Link.Replace("http://", "https://");
-                //because the link generated is http, and to display on website we need use https, so we do replace here
-                model.Link = httpsUrl;
-                model.LikeNumber = theDocument.LikeNumber;
-                model.DislikeNumber = theDocument.DislikeNumber;
-                model.Rating = theDocument.Rating;
-            }
 
 
-            return View(model);
-        }
-
-        public ActionResult RedirectToUrl(string href)
-        {
-            //use a string of link that it can redirect to comtains schoolName, courseName, documentName, and documentID
-            return Redirect(href);
-        }
-
-        public async Task<IActionResult> DocumentCreateSuccess()
-        {
-            //after upload complete we show this
-            return View();
-        }
-
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        //used to generate HTML dynamically on the server-side, the code is rendering the "_ValidationScriptsPartial" partial view and waiting for its completion using the await keyword
     }
+
+
 }
