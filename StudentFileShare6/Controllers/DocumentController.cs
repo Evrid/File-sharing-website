@@ -254,7 +254,12 @@ namespace StudentFileShare6.Controllers
                     //
 
                     var putObjectRequest = new PutObjectRequest(bucketName, fileName, fileStream);
-                    putObjectRequest.StreamTransferProgress += (object sender, StreamTransferProgressArgs args) => streamProgressCallbackAsync(sender, args, document, document.DocumentID, _hubContext);
+                    //putObjectRequest.StreamTransferProgress += (object sender, StreamTransferProgressArgs args) => streamProgressCallbackAsync(sender, args, document, document.DocumentID, _hubContext);
+
+                    putObjectRequest.StreamTransferProgress += async (object sender, StreamTransferProgressArgs args) =>
+                    {
+                        await streamProgressCallbackAsync(sender, args, document, document.DocumentID, _hubContext);
+                    };
 
 
                     ossClient.PutObject(putObjectRequest);
@@ -300,8 +305,8 @@ namespace StudentFileShare6.Controllers
 
                 document.LikeNumber = 0;
                 document.DislikeNumber = 0;
-              //  document.Rating = null;
-                document.Rating = 0;
+                document.Rating = null;
+            
                 _context.Add(document);
                 await _context.SaveChangesAsync();
                 //  return RedirectToAction(nameof(Index));    
@@ -310,8 +315,8 @@ namespace StudentFileShare6.Controllers
 
                 return RedirectToAction("DocumentCreateSuccess", "Document");   //redirect to "DocumentCreateSuccess" action of "Document" controller
             }
-            ViewData["CourseID"] = new SelectList(_context.Set<Course>(), "CourseID", "CourseID", document.CourseID);
-            ViewData["SchoolID"] = new SelectList(_context.Set<University>(), "SchoolID", "SchoolID", document.SchoolID);
+            //ViewData["CourseID"] = new SelectList(_context.Set<Course>(), "CourseID", "CourseID", document.CourseID);
+            //ViewData["SchoolID"] = new SelectList(_context.Set<University>(), "SchoolID", "SchoolID", document.SchoolID);
             return View(document);
         }
 

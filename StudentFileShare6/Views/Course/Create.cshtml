@@ -202,7 +202,10 @@
 
 
     <script>
-        document.querySelector('form').addEventListener('submit', function (event) {
+     
+
+      //if they didn't select the right thing when click on sumbit button, prevent from doing so, to keep the data they entered
+        document.querySelector('input[type="submit"]').addEventListener('click', function (event) {
             var input = document.getElementById('schoolInput');
             var options = document.getElementById('universityList').options;
             var value = input.value;
@@ -214,7 +217,7 @@
             if (!match) {
                 event.preventDefault(); // Prevent form submission
                 console.log("To here is correct");
-                alert('Select a university name from the list.');
+                alert('Enter and select a university name from the list.');
             } else {
                 var courseNameInput = document.getElementById('courseNameInput').value;
 

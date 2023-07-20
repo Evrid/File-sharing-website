@@ -11,6 +11,9 @@
     string progressTextId = progressBarId + "text";
 
     var userId = User.Identity.IsAuthenticated ? userManager.GetUserId(User) : string.Empty;
+
+
+    string progressBarId2 = random.Next(10000000, 99999999).ToString()+"2";
 }
 
 <h1>Create</h1>
@@ -44,7 +47,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label">Name of your file: </label>
-                <input asp-for="Name" class="form-control" />
+                <input asp-for="Name" id="nameInput" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
@@ -101,7 +104,7 @@
 
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
+                <input asp-for="Description" class="form-control" value="No Description" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
@@ -134,10 +137,12 @@
 
 
 
+          
+
             @if (User.Identity.IsAuthenticated)
             {
                 <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <input type="submit" value="Create" class="btn btn-primary" onclick="startProgressBar()" />
                 </div>
             }
             else
@@ -149,13 +154,17 @@
             }
 
 
-            <!-- Add an ID to the progress bar -->
+            <!-- Add an ID to the progress bar, first one for SignalR, second one for auto update -->
 
 
 
             <div id="progress-bar-container" style="width: 200px; height: 20px;">
                 <div id="@Html.Raw(progressBarId)"></div>
             </div>
+            <p>Progress bar updating only works in Google Chrome, not Firefox</p>
+            @*<div id="progress-bar-container" style="width: 200px; height: 20px;">
+                <div id="@Html.Raw(progressBarId2)"></div>
+            </div>*@
 
 
             <P id="@Html.Raw(progressTextId)" style="color: red; font-size: 14px;">Waiting for uploading</P>
@@ -182,10 +191,7 @@
             Accounting<br>
             Aerospace Engineering
         </p>
-        <h4>Note:</h4>
-     <p>When I click "<strong><span style="color:red;">Create</span></strong>" button, if I run it in Visual Studio it works well, but in Azure APP I got an <strong><span style="color:red;">error</span></strong>. The error is on the server side, and it asks me to "<strong>wapping to Development environment will display more detailed information about the error that occurred.</strong>"</p>
-        <p>But because my current pricing plan is <strong><span style="color:red;">free</span></strong>, so I <strong><span style="color:red;">cannot</span></strong> swap to development mode and solve the issue (it needs a paid plan to be able to swap and see what is going on in Azure server). So, I suggest you not to use the "<strong><span style="color:red;">Create</span></strong>" button for uploading documents. Other stuff works well.</p>
-    </div>
+         </div>
 </div>
 
 <div>
@@ -202,6 +208,7 @@
     <p>
         - The controller action <code>Create</code> includes a file upload functionality.<br>
         - During the file upload, the progress is tracked and updated in real-time.<br>
+        - Works in Google Chrome, doesn't work in Firefox  <br>
         - The <code>streamProgressCallbackAsync</code> method is invoked during the upload process and updates the upload progress percentage.<br>
         - SignalR is used to send the progress updates to connected clients.<br>
         - The connected clients can receive the progress updates and dynamically display them as a progress bar on the user interface.<br>
@@ -298,12 +305,14 @@
 
             if (!file.type.match('application/pdf')) {
                 document.getElementById('fileInputError').textContent = 'Please select a PDF file.';
+                alert("Please select a PDF file.");
                 event.target.value = ''; // Clear the file input
                 return;
             }
 
             if (fileSize > 10) {
                 document.getElementById('fileInputError').textContent = 'File size must be less than 10MB.';
+                alert("File size must be less than 10MB.");
                 event.target.value = ''; // Clear the file input
                 return;
             }
@@ -318,7 +327,8 @@
         //for file uploading progress bar
         connection.on("UpdateFileProgressIdentifier", (fileID, progressPercentage) => {
             // Handle the received parameters
-            // console.log("test1");
+            console.log("Connection on and should display message");
+            console.log(progressPercentage);
             updateProgressBar("@progressBarId", "@progressTextId", progressPercentage);
             //we MUST put updateProgressBar() before console.log() because if not, then after console.log() being executed then it execute updateProgressBar() but we can't see, because it is too late
             console.log("Received parameters:", fileID, progressPercentage);
@@ -330,6 +340,27 @@
 
 
     </script>
+
+
+    
+<script>
+    //for the second progress bar2 to auto update
+    function startProgressBar() {
+        var progressBar = document.getElementById(@progressBarId2);
+        var width = 0;
+        var intervalId = setInterval(frame, 15); // Adjust the interval time as needed, the larger the smaller
+
+        function frame() {
+            if (width >= 100) {
+                clearInterval(intervalId);
+            } else {
+                width++;
+                progressBar.style.width = width + "%";
+                progressBar.innerHTML = width + "%";
+            }
+        }
+    }
+</script>
 
 
 
@@ -475,21 +506,41 @@
 
 
     <script>
-        //ask user must select from datalist of courseList
-        document.querySelector('form').addEventListener('submit', function (event) {
+
+
+        document.querySelector('input[type="submit"]').addEventListener('click', function (event) {
             var input = document.getElementById('courseInput');
             var options = document.getElementById('courseList').options;
             var value = input.value;
+            var fileInput = document.getElementById('fileInput');
+            var name = document.getElementById('nameInput').value;
 
             var match = Array.from(options).find(function (option) {
                 return option.value === value;
             });
 
-            if (!match) {
+            if (!match || fileInput.files.length === 0 || name === '') {
                 event.preventDefault(); // Prevent form submission
-                alert('After select a valid university from the list, select a valid course option from the list.');
+
+                var errorMessage = '';
+
+                if (!match) {
+                    errorMessage += 'Please enter and select a valid university option then enter and select a course option from the list. ';
+                }
+
+                if (fileInput.files.length === 0) {
+                    errorMessage += 'Please select a document to upload. ';
+                }
+
+                if (name === '') {
+                    errorMessage += 'Please provide a value for the "Name of your file" field.';
+                }
+
+                alert(errorMessage);
             }
         });
+
+
 
     </script>
 
