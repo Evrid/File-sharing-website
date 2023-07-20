@@ -3,11 +3,15 @@
 Project demo see
 
 https://studentfileweb.azurewebsites.net/
+
 //My OSS subscription expire at Oct 24, 2023, means might not be able to see the files uploaded afterwards
-////Some feature of the website only work on laptop (not phone), like search and auto suggest
+
+//Some feature of the website only work on laptop (not phone), like search and auto suggest
 
 Detailed steps of this project see my blog:
+
 https://evrid.wordpress.com/
+
 
 Complete files at personal google drive
 
